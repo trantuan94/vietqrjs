@@ -67,6 +67,8 @@ var BeneficaryOrganizationFieldID;
 })(BeneficaryOrganizationFieldID = exports.BeneficaryOrganizationFieldID || (exports.BeneficaryOrganizationFieldID = {}));
 var ServiceCode;
 (function (ServiceCode) {
+    ServiceCode["BY_PRODUCT_PAYMENT_SERVICE"] = "QRPUSH";
+    ServiceCode["BY_CASH_WITHDRAWL_SERVICE"] = "QRCASH";
     ServiceCode["BY_ACCOUNT_NUMBER"] = "QRIBFTTA";
     ServiceCode["BY_CARD_NUMBER"] = "QRIBFTTC";
 })(ServiceCode = exports.ServiceCode || (exports.ServiceCode = {}));

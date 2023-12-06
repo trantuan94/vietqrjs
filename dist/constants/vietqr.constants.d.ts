@@ -55,6 +55,8 @@ export declare enum BeneficaryOrganizationFieldID {
     MERCHANT_ID = "01"
 }
 export declare enum ServiceCode {
+    BY_PRODUCT_PAYMENT_SERVICE = "QRPUSH",
+    BY_CASH_WITHDRAWL_SERVICE = "QRCASH",
     BY_ACCOUNT_NUMBER = "QRIBFTTA",
     BY_CARD_NUMBER = "QRIBFTTC"
 }

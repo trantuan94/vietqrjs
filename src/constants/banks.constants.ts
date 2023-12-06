@@ -4,6 +4,7 @@ export enum SupportLevel {
   PARTIALLY_FEATURES = 2,
   FULL_FEATURES = 3,
 }
+
 export enum BankBIN {
   ACB = '970416',
   VP_BANK = '970432',
