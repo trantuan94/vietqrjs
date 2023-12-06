@@ -72,6 +72,8 @@ export enum BeneficaryOrganizationFieldID {
 }
 
 export enum ServiceCode {
+  BY_PRODUCT_PAYMENT_SERVICE = 'QRPUSH', // dịch vụ thanh toán mua hàng
+  BY_CASH_WITHDRAWL_SERVICE = 'QRCASH', // dịch vụ rút tiền mặt tại cây ATM bằng QR code
   BY_ACCOUNT_NUMBER = 'QRIBFTTA', // dịch vụ chuyển nhanh NAPAS247 bằng mã QR đến Tài khoản
   BY_CARD_NUMBER = 'QRIBFTTC', // dịch vụ chuyển nhanh NAPAS247 bằng mã QR đến thẻ
 }
