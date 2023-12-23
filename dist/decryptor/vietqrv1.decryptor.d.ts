@@ -4,9 +4,10 @@ export declare class VietQrV1Decryptor {
     readQrItem({ fieldId, fieldName, rawValue, required, }: IDecryptorElement): IDecryptedQrItem;
     validateQrItem(value: string, length: number, fieldName: string, options: IDecryptorOptions): void;
     decryptQrItem(rawValue: string, fieldId: string, fieldName: string, options: IDecryptorOptions): IDecryptedQrItem;
+    isValidChecksum(qrString: string): boolean;
     decrypt(qrString: string): IVietQrDataV1;
     decryptMerchantAccInfo(rawStr: string): IMerchantAccountInfo;
-    decryptBenificiaryOrg(rawStr: string): IBeneficiaryOrganiation;
+    decryptBeneficiaryOrg(rawStr: string): IBeneficiaryOrganiation;
     decryptLanguageTemplate(rawStr: string): ILanguageTemplate;
     decryptAdditionalData(rawStr: string): IAdditionalData;
     ignoreUnknownQrItem(rawValue: string, nestedFieldName: string): string;

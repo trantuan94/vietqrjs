@@ -161,44 +161,44 @@ export interface IBasicVietQrData {
 }
 export declare enum VietQRFieldName {
     VERSION = "version",
-    INITIAL_METHOD = "initialMethod",
-    MERCHANT_ACCOUNT_INFO = "merchantAccInfo",
-    MERCHANT_CATEGORY_CODE = "mcc",
+    INITIAL_METHOD = "initial method",
+    MERCHANT_ACCOUNT_INFO = "merchant account information",
+    MERCHANT_CATEGORY_CODE = "merchant category code",
     TRANSACTION_CURRENCY = "currency",
     TRANSACTION_AMOUNT = "amount",
-    TIP_OR_CONVENIENCE_INDICATOR = "tipConvenienceIndicator",
-    CONVENIENCE_FEE_FIXED = "convenienceFeeFixed",
-    CONVENIENCE_FEE_PERCENTAGE = "convenienceFeePercentage",
-    COUNTRY_CODE = "countryCode",
-    MERCHANT_NAME = "merchantName",
-    MERCHANT_CITY = "merchantCity",
-    POSTAL_CODE = "postalCode",
-    ADDITIONAL_DATA = "additionalData",
-    LANGUAGE_TEMPLATE = "languageTemplate",
-    CRC_CODE = "crcCode"
+    TIP_OR_CONVENIENCE_INDICATOR = "tip or convenience indicator",
+    CONVENIENCE_FEE_FIXED = "value of convenience fee fixed",
+    CONVENIENCE_FEE_PERCENTAGE = "value of convenience fee percentage",
+    COUNTRY_CODE = "country code",
+    MERCHANT_NAME = "merchant Name",
+    MERCHANT_CITY = "merchant city",
+    POSTAL_CODE = "postal code",
+    ADDITIONAL_DATA = "additional Data",
+    LANGUAGE_TEMPLATE = "language template",
+    CRC_CODE = "crc checksum"
 }
 export declare enum MerchantAccInfoFieldName {
     GUID = "guid",
-    BENEFICIARY_ORGANIZATION = "benificiaryOrg",
-    SERVICE_CODE = "serviceCode"
+    BENEFICIARY_ORGANIZATION = "beneficiary Organization",
+    SERVICE_CODE = "service code"
 }
 export declare enum BeneficaryOrganizationFieldName {
-    ACQUIER_ID = "acquirerId",
-    MERCHANT_ID = "merchantId"
+    ACQUIER_ID = "acquirer ID",
+    MERCHANT_ID = "merchant ID"
 }
 export declare enum AdditionalDataFieldName {
-    BILL_NUMBER = "billNumber",
-    MOBILE_NUMBER = "mobileNumber",
-    STORE_LABEL = "storeLabel",
-    LOYALTY_NUMBER = "loyaltyNumber",
-    REFERENCE_LABEL = "referenceLabel",
-    CUSTOMER_LABEL = "customerLabel",
-    TERMINAL_LABEL = "terminalLabel",
-    PURPOSE_OF_TRANSACTION = "purposeOfTxn",
-    ADDITIONAL_CONSUMER_DATA_REQUEST = "additionalConsumerDataReq"
+    BILL_NUMBER = "bill Number",
+    MOBILE_NUMBER = "mobile Number",
+    STORE_LABEL = "store Label",
+    LOYALTY_NUMBER = "loyalty Number",
+    REFERENCE_LABEL = "reference Label",
+    CUSTOMER_LABEL = "customer Label",
+    TERMINAL_LABEL = "terminal Label",
+    PURPOSE_OF_TRANSACTION = "purpose of transaction",
+    ADDITIONAL_CONSUMER_DATA_REQUEST = "additional Consumer Data Request"
 }
 export declare enum LanguageTemplateFieldName {
     LANGUAGE_PREFERENCE = "preference",
-    ALTERNATE_MERCHANT_NAME = "merchantName",
-    ALTERNATE_MERCHANT_CITY = "merchantCity"
+    ALTERNATE_MERCHANT_NAME = "merchant name",
+    ALTERNATE_MERCHANT_CITY = "merchant city"
 }

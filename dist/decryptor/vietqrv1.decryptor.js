@@ -33,14 +33,14 @@ class VietQrV1Decryptor {
         if (!value && required) {
             throw new Error(`Field ${fieldName} in QR string is required.`);
         }
+        if (value && value.length !== length) {
+            throw new Error(`Length of ${fieldName} is not equal to defined length in QR string.`);
+        }
         if (maxLength && maxLength < length) {
             throw new Error(`Length of ${fieldName} in QR string must be less than or equal to ${maxLength}.`);
         }
         if (fixedLength && fixedLength !== length) {
             throw new Error(`Length of ${fieldName} in QR string must be equal to ${fixedLength}.`);
-        }
-        if (value && value.length !== length) {
-            throw new Error(`Length of ${fieldName} is not equal to defined length in QR string.`);
         }
         if (customValidate && !customValidate(value)) {
             throw new Error(`Value of ${fieldName} is invalid`);
@@ -68,6 +68,9 @@ class VietQrV1Decryptor {
             value,
             nextRawValue,
         };
+    }
+    isValidChecksum(qrString) {
+        return (0, utils_1.isValidChecksum)(qrString);
     }
     decrypt(qrString) {
         if (!(0, utils_1.isValidChecksum)(qrString)) {
@@ -129,7 +132,7 @@ class VietQrV1Decryptor {
                 case constants_1.VietQrFieldID.TRANSACTION_AMOUNT:
                     transactionAmount = this.decryptQrItem(nextRawStr, constants_1.VietQrFieldID.TRANSACTION_AMOUNT, constants_1.VietQRFieldName.TRANSACTION_AMOUNT, {
                         maxLength: 13,
-                        customValidate: utils_1.isTransactionAmount,
+                        customValidate: utils_1.isFloatingPointAmount,
                     });
                     nextRawStr = transactionAmount.nextRawValue;
                     break;
@@ -137,7 +140,7 @@ class VietQrV1Decryptor {
                     tipOrConvenienceIndicator = this.decryptQrItem(nextRawStr, constants_1.VietQrFieldID.TIP_OR_CONVENIENCE_INDICATOR, constants_1.VietQRFieldName.TIP_OR_CONVENIENCE_INDICATOR, {
                         fixedLength: 2,
                         required: false,
-                        customValidate: utils_1.isNumeric,
+                        customValidate: utils_1.isTipOrConvenienceIndicator,
                     });
                     nextRawStr = tipOrConvenienceIndicator.nextRawValue;
                     break;
@@ -145,7 +148,7 @@ class VietQrV1Decryptor {
                     convenienceFeeFixed = this.decryptQrItem(nextRawStr, constants_1.VietQrFieldID.CONVENIENCE_FEE_FIXED, constants_1.VietQRFieldName.CONVENIENCE_FEE_FIXED, {
                         maxLength: 13,
                         required: false,
-                        customValidate: utils_1.isTransactionAmount,
+                        customValidate: utils_1.isFloatingPointAmount,
                     });
                     nextRawStr = convenienceFeeFixed.nextRawValue;
                     break;
@@ -208,6 +211,18 @@ class VietQrV1Decryptor {
                     break;
             }
         }
+        if (!(initialMethod === null || initialMethod === void 0 ? void 0 : initialMethod.value)) {
+            throw new Error(`Field ${constants_1.VietQRFieldName.INITIAL_METHOD} in QR is required.`);
+        }
+        if (!(merchantAccountInfo === null || merchantAccountInfo === void 0 ? void 0 : merchantAccountInfo.value)) {
+            throw new Error(`Field ${constants_1.VietQRFieldName.MERCHANT_ACCOUNT_INFO} in QR is required.`);
+        }
+        if (!(currencyCode === null || currencyCode === void 0 ? void 0 : currencyCode.value)) {
+            throw new Error(`Field ${constants_1.VietQRFieldName.TRANSACTION_CURRENCY} in QR is required.`);
+        }
+        if (!(countryCode === null || countryCode === void 0 ? void 0 : countryCode.value)) {
+            throw new Error(`Field ${constants_1.VietQRFieldName.COUNTRY_CODE} in QR is required.`);
+        }
         if ((tipOrConvenienceIndicator === null || tipOrConvenienceIndicator === void 0 ? void 0 : tipOrConvenienceIndicator.value) === constants_1.TipOrConvenienceIndicatorType.FEE_PERCENTAGE &&
             !(convenienceFeePercentage === null || convenienceFeePercentage === void 0 ? void 0 : convenienceFeePercentage.value)) {
             throw new Error(`${constants_1.VietQRFieldName.CONVENIENCE_FEE_PERCENTAGE} in QR is required.`);
@@ -245,7 +260,7 @@ class VietQrV1Decryptor {
     decryptMerchantAccInfo(rawStr) {
         let nextRawStr = rawStr;
         let decryptedGUID;
-        let benificiaryOrg;
+        let beneficiaryOrg;
         let decryptedServiceCode;
         while (nextRawStr && nextRawStr !== '') {
             const fieldId = nextRawStr.substring(0, 2);
@@ -261,11 +276,11 @@ class VietQrV1Decryptor {
                     nextRawStr = decryptedGUID.nextRawValue;
                     break;
                 case constants_1.MerchantAccInfoFieldID.BENEFICIARY_ORGANIZATION:
-                    benificiaryOrg = this.decryptQrItem(nextRawStr, constants_1.MerchantAccInfoFieldID.BENEFICIARY_ORGANIZATION, constants_1.MerchantAccInfoFieldName.BENEFICIARY_ORGANIZATION, {
+                    beneficiaryOrg = this.decryptQrItem(nextRawStr, constants_1.MerchantAccInfoFieldID.BENEFICIARY_ORGANIZATION, constants_1.MerchantAccInfoFieldName.BENEFICIARY_ORGANIZATION, {
                         maxLength: 99,
                         customValidate: utils_1.isANS,
                     });
-                    nextRawStr = benificiaryOrg.nextRawValue;
+                    nextRawStr = beneficiaryOrg.nextRawValue;
                     break;
                 case constants_1.MerchantAccInfoFieldID.SERVICE_CODE:
                     decryptedServiceCode = this.decryptQrItem(nextRawStr, constants_1.MerchantAccInfoFieldID.SERVICE_CODE, constants_1.MerchantAccInfoFieldName.SERVICE_CODE, {
@@ -282,20 +297,17 @@ class VietQrV1Decryptor {
         if (!(decryptedGUID === null || decryptedGUID === void 0 ? void 0 : decryptedGUID.value)) {
             throw new Error(`${constants_1.MerchantAccInfoFieldName.GUID} in Merchant Account Information is required.`);
         }
-        if (!(benificiaryOrg === null || benificiaryOrg === void 0 ? void 0 : benificiaryOrg.value)) {
+        if (!(beneficiaryOrg === null || beneficiaryOrg === void 0 ? void 0 : beneficiaryOrg.value)) {
             throw new Error(`${constants_1.MerchantAccInfoFieldName.BENEFICIARY_ORGANIZATION} in Merchant Account Information is required.`);
         }
-        if (!(decryptedServiceCode === null || decryptedServiceCode === void 0 ? void 0 : decryptedServiceCode.value)) {
-            throw new Error(`${constants_1.MerchantAccInfoFieldName.SERVICE_CODE} in Merchant Account Information is required.`);
-        }
-        const decryptedBenificiaryOrg = this.decryptBenificiaryOrg(benificiaryOrg === null || benificiaryOrg === void 0 ? void 0 : benificiaryOrg.value);
+        const decryptedBeneficiaryOrg = this.decryptBeneficiaryOrg(beneficiaryOrg === null || beneficiaryOrg === void 0 ? void 0 : beneficiaryOrg.value);
         return {
             guid: decryptedGUID === null || decryptedGUID === void 0 ? void 0 : decryptedGUID.value,
-            beneficiaryOrg: decryptedBenificiaryOrg,
+            beneficiaryOrg: decryptedBeneficiaryOrg,
             serviceCode: decryptedServiceCode === null || decryptedServiceCode === void 0 ? void 0 : decryptedServiceCode.value,
         };
     }
-    decryptBenificiaryOrg(rawStr) {
+    decryptBeneficiaryOrg(rawStr) {
         let nextRawStr = rawStr;
         let acquirerId;
         let merchantId;
@@ -323,10 +335,10 @@ class VietQrV1Decryptor {
             }
         }
         if (!(acquirerId === null || acquirerId === void 0 ? void 0 : acquirerId.value)) {
-            throw new Error(`${constants_1.BeneficaryOrganizationFieldName.ACQUIER_ID} in Benificiary Organization is required.`);
+            throw new Error(`Field ${constants_1.BeneficaryOrganizationFieldName.ACQUIER_ID} in Benificiary Organization is required.`);
         }
         if (!(merchantId === null || merchantId === void 0 ? void 0 : merchantId.value)) {
-            throw new Error(`${constants_1.BeneficaryOrganizationFieldName.MERCHANT_ID} in Benificiary Organization is required.`);
+            throw new Error(`Field ${constants_1.BeneficaryOrganizationFieldName.MERCHANT_ID} in Benificiary Organization is required.`);
         }
         return {
             acquierId: acquirerId.value,
@@ -377,9 +389,9 @@ class VietQrV1Decryptor {
             throw new Error(`${constants_1.LanguageTemplateFieldName.ALTERNATE_MERCHANT_NAME} in Language Template is required.`);
         }
         return {
-            [constants_1.LanguageTemplateFieldName.LANGUAGE_PREFERENCE]: decryptedPreference.value,
-            [constants_1.LanguageTemplateFieldName.ALTERNATE_MERCHANT_NAME]: decryptedMerchantName.value,
-            [constants_1.LanguageTemplateFieldName.ALTERNATE_MERCHANT_CITY]: decryptedMerchantCity === null || decryptedMerchantCity === void 0 ? void 0 : decryptedMerchantCity.value,
+            preference: decryptedPreference.value,
+            merchantName: decryptedMerchantName.value,
+            merchantCity: decryptedMerchantCity === null || decryptedMerchantCity === void 0 ? void 0 : decryptedMerchantCity.value,
         };
     }
     decryptAdditionalData(rawStr) {
@@ -477,22 +489,22 @@ class VietQrV1Decryptor {
             }
         }
         return {
-            [constants_1.AdditionalDataFieldName.BILL_NUMBER]: billNumber === null || billNumber === void 0 ? void 0 : billNumber.value,
-            [constants_1.AdditionalDataFieldName.MOBILE_NUMBER]: mobileNumber === null || mobileNumber === void 0 ? void 0 : mobileNumber.value,
-            [constants_1.AdditionalDataFieldName.STORE_LABEL]: storeLabel === null || storeLabel === void 0 ? void 0 : storeLabel.value,
-            [constants_1.AdditionalDataFieldName.LOYALTY_NUMBER]: loyaltyNumber === null || loyaltyNumber === void 0 ? void 0 : loyaltyNumber.value,
-            [constants_1.AdditionalDataFieldName.REFERENCE_LABEL]: referenceLabel === null || referenceLabel === void 0 ? void 0 : referenceLabel.value,
-            [constants_1.AdditionalDataFieldName.CUSTOMER_LABEL]: customerLabel === null || customerLabel === void 0 ? void 0 : customerLabel.value,
-            [constants_1.AdditionalDataFieldName.TERMINAL_LABEL]: terminalLabel === null || terminalLabel === void 0 ? void 0 : terminalLabel.value,
-            [constants_1.AdditionalDataFieldName.PURPOSE_OF_TRANSACTION]: purposeOfTxn === null || purposeOfTxn === void 0 ? void 0 : purposeOfTxn.value,
-            [constants_1.AdditionalDataFieldName.ADDITIONAL_CONSUMER_DATA_REQUEST]: additionalConsumerDataReq === null || additionalConsumerDataReq === void 0 ? void 0 : additionalConsumerDataReq.value,
+            billNumber: billNumber === null || billNumber === void 0 ? void 0 : billNumber.value,
+            mobileNumber: mobileNumber === null || mobileNumber === void 0 ? void 0 : mobileNumber.value,
+            storeLabel: storeLabel === null || storeLabel === void 0 ? void 0 : storeLabel.value,
+            loyaltyNumber: loyaltyNumber === null || loyaltyNumber === void 0 ? void 0 : loyaltyNumber.value,
+            referenceLabel: referenceLabel === null || referenceLabel === void 0 ? void 0 : referenceLabel.value,
+            customerLabel: customerLabel === null || customerLabel === void 0 ? void 0 : customerLabel.value,
+            terminalLabel: terminalLabel === null || terminalLabel === void 0 ? void 0 : terminalLabel.value,
+            purposeOfTxn: purposeOfTxn === null || purposeOfTxn === void 0 ? void 0 : purposeOfTxn.value,
+            additionalConsumerDataReq: additionalConsumerDataReq === null || additionalConsumerDataReq === void 0 ? void 0 : additionalConsumerDataReq.value,
         };
     }
     ignoreUnknownQrItem(rawValue, nestedFieldName) {
         const fieldId = rawValue.substring(0, 2);
         const length = Number(rawValue.substring(2, 4));
         if (Number.isNaN(length) || length <= 0) {
-            throw new Error(`Length of unknown field ID ${fieldId} in ${nestedFieldName} field of QR is invalid.`);
+            throw new Error(`Length of unknown field ID ${fieldId}${nestedFieldName ? ' in ' + nestedFieldName + ' field' : ''} of QR is invalid.`);
         }
         const nextRawValue = rawValue.substring(4 + length);
         return nextRawValue;

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createQRCode = exports.calcCrcCheckSum = exports.convertCurrencyCode2Number = exports.calcQrItemDataLength = exports.isValidChecksum = exports.isAN = exports.isANS = exports.isTransactionAmount = exports.isNumeric = exports.isServiceCode = exports.isValidCurrencyCode = exports.isValidCountryCode = exports.getEnumValues = exports.getEnumKeys = void 0;
+exports.createQRCode = exports.isTipOrConvenienceIndicator = exports.calcCrcCheckSum = exports.calcQrItemDataLength = exports.isValidChecksum = exports.isAN = exports.isANS = exports.isFloatingPointAmount = exports.isNumeric = exports.isServiceCode = exports.isValidCurrencyCode = exports.isValidCountryCode = exports.getEnumValues = exports.getEnumKeys = void 0;
 const country_data_1 = require("country-data");
 const crc_1 = require("crc");
 const QRCode = require("qrcode");
@@ -31,10 +31,10 @@ function isNumeric(value) {
     return /^(\d)*$/.test(value);
 }
 exports.isNumeric = isNumeric;
-function isTransactionAmount(value) {
+function isFloatingPointAmount(value) {
     return /^(0\.[1-9]|0\.\d[1-9]|[1-9](\d+)?(\.\d{0,2})?)$/.test(value);
 }
-exports.isTransactionAmount = isTransactionAmount;
+exports.isFloatingPointAmount = isFloatingPointAmount;
 function isANS(value) {
     return /^[\x20-\x7E\xA0-\xA3\xA5\xA7\xA9-\xB3\xB5-\xB7\xB9-\xBB\xBF-\xFF\u20AC\u0160\u0161\u017D\u017E\u0152\u0153\u0178]*$/.test(value);
 }
@@ -55,14 +55,14 @@ function calcQrItemDataLength(data) {
         : '';
 }
 exports.calcQrItemDataLength = calcQrItemDataLength;
-function convertCurrencyCode2Number(currencyCode) {
-    return isValidCurrencyCode(currencyCode) ? country_data_1.currencies[currencyCode].number : 0;
-}
-exports.convertCurrencyCode2Number = convertCurrencyCode2Number;
 function calcCrcCheckSum(value) {
     return (0, crc_1.crc16ccitt)(value).toString(16).toUpperCase();
 }
 exports.calcCrcCheckSum = calcCrcCheckSum;
+function isTipOrConvenienceIndicator(value) {
+    return getEnumValues(constants_1.TipOrConvenienceIndicatorType).includes(value);
+}
+exports.isTipOrConvenienceIndicator = isTipOrConvenienceIndicator;
 async function createQRCode(dataForQRcode, center_image, width, cwidth) {
     if (!center_image) {
         center_image =
