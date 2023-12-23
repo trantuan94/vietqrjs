@@ -14,9 +14,10 @@ import {
   IMerchantAccountInfo,
   DEFAULT_CURRENCY,
   DEFAULT_COUNTRY_CODE,
+  IAdditionalData,
+  ILanguageTemplate,
 } from '../constants/index';
-import {genDataLength, StringUtil, createQRCode} from '../utils';
-import {Crc, CrcType} from '../crc.helper';
+import { calcQrItemDataLength, createQRCode, calcCrcCheckSum } from '../utils';
 
 export class VietQRV1Builder {
   private data: IVietQrDataV1;
@@ -73,6 +74,24 @@ export class VietQRV1Builder {
     return this;
   }
 
+  public setMerchantName(merchantName: string) {
+    this.data.merchantName = merchantName;
+
+    return this;
+  }
+
+  public setMerchantCity(merchantCity: string) {
+    this.data.merchantCity = merchantCity;
+
+    return this;
+  }
+
+  public setPostalCode(postalCode: string) {
+    this.data.postalCode = postalCode;
+
+    return this;
+  }
+
   public setTxnAmount(amount: number) {
     this.data.txnAmount = amount.toString();
     this.data.initMethod = VietQrInitiateMethod.DYNAMIC;
@@ -85,6 +104,8 @@ export class VietQRV1Builder {
       ...this.data.additionalData,
       purposeOfTxn: description,
     };
+
+    return this;
   }
 
   public setTxnCurrency(currencyCode = DEFAULT_CURRENCY) {
@@ -99,8 +120,31 @@ export class VietQRV1Builder {
     return this;
   }
 
+  public setAdditionalData(additionalData: IAdditionalData) {
+    this.data.additionalData = {
+      ...this.data.additionalData,
+      ...additionalData,
+    };
+
+    return this;
+  }
+
+  public setLanguageTemplate(languageTemplate: ILanguageTemplate) {
+    this.data.languageTemplate = languageTemplate;
+
+    return this;
+  }
+
+  public setmerchantCategoryCode(mcc: string) {
+    this.data.merchantCategoryCode = mcc;
+
+    return this;
+  }
+
   public refresh() {
     this.initData();
+
+    return this;
   }
 
   public quickBuild(input: IBasicVietQrData) {
@@ -148,7 +192,7 @@ export class VietQRV1Builder {
       VietQrFieldID.CRC_CODE +
       '04';
 
-    this.qrCodeString = `${dataStr}${this.calcCRCCode(dataStr)}`;
+    this.qrCodeString = `${dataStr}${calcCrcCheckSum(dataStr)}`;
 
     return this;
   }
@@ -165,75 +209,75 @@ export class VietQRV1Builder {
     }
   }
 
-  private genBasicDataStructure(fieldID: string, dt: any): string {
-    return dt ? `${fieldID}${genDataLength(dt)}${dt}` : '';
+  private genBasicQrStringItem(fieldID: string, dt: any): string {
+    return dt ? `${fieldID}${calcQrItemDataLength(dt)}${dt}` : '';
   }
 
   private genVersion() {
-    return this.genBasicDataStructure(VietQrFieldID.VERSION, this.data.version);
+    return this.genBasicQrStringItem(VietQrFieldID.VERSION, this.data.version);
   }
 
   private genInitMethod() {
-    return this.genBasicDataStructure(VietQrFieldID.INITIAL_METHOD, this.data.initMethod);
+    return this.genBasicQrStringItem(VietQrFieldID.INITIAL_METHOD, this.data.initMethod);
   }
 
   private genMerchantAccInfo() {
-    return this.genBasicDataStructure(
+    return this.genBasicQrStringItem(
       VietQrFieldID.MERCHANT_ACCOUNT_INFO,
       this.genGUIDInfo() + this.genBeneficiaryOrg() + this.genServiceCodeInfo(),
     );
   }
 
   private genGUIDInfo(): string {
-    return this.genBasicDataStructure(MerchantAccInfoFieldID.GUID, this.data.merchantAccInfo.guid);
+    return this.genBasicQrStringItem(MerchantAccInfoFieldID.GUID, this.data.merchantAccInfo.guid);
   }
 
   private genBeneficiaryOrg(): string {
-    return this.genBasicDataStructure(
+    return this.genBasicQrStringItem(
       MerchantAccInfoFieldID.BENEFICIARY_ORGANIZATION,
       this.genAcquierInfo() + this.genMerchantIdInfo(),
     );
   }
 
   private genAcquierInfo(): string {
-    return this.genBasicDataStructure(
+    return this.genBasicQrStringItem(
       BeneficaryOrganizationFieldID.ACQUIER_ID,
       this.data.merchantAccInfo.beneficiaryOrg.acquierId,
     );
   }
 
   private genMerchantIdInfo(): string {
-    return this.genBasicDataStructure(
+    return this.genBasicQrStringItem(
       BeneficaryOrganizationFieldID.MERCHANT_ID,
       this.data.merchantAccInfo.beneficiaryOrg.merchantId,
     );
   }
 
   private genServiceCodeInfo(): string {
-    return this.genBasicDataStructure(
+    return this.genBasicQrStringItem(
       MerchantAccInfoFieldID.SERVICE_CODE,
       this.data.merchantAccInfo.serviceCode,
     );
   }
 
   private genCategoryCodeInfo(): string {
-    return this.genBasicDataStructure(
+    return this.genBasicQrStringItem(
       VietQrFieldID.MERCHANT_CATEGORY_CODE,
       this.data.merchantCategoryCode,
     );
   }
 
   private genCurrencyInfo(): string {
-    return this.genBasicDataStructure(VietQrFieldID.TRANSACTION_CURRENCY, this.data.txnCurrency);
+    return this.genBasicQrStringItem(VietQrFieldID.TRANSACTION_CURRENCY, this.data.txnCurrency);
   }
 
   private genAmountInfo(): string {
-    return this.genBasicDataStructure(VietQrFieldID.TRANSACTION_AMOUNT, this.data.txnAmount);
+    return this.genBasicQrStringItem(VietQrFieldID.TRANSACTION_AMOUNT, this.data.txnAmount);
   }
 
   private genTipOrConvenienceIndicatorInfo(): string {
     return (
-      this.genBasicDataStructure(
+      this.genBasicQrStringItem(
         VietQrFieldID.TIP_OR_CONVENIENCE_INDICATOR,
         this.data.tipConvenienceIndicator,
       ) +
@@ -244,7 +288,7 @@ export class VietQRV1Builder {
 
   private genConvenienceFeeFixed(): string {
     return this.data.tipConvenienceIndicator === TipOrConvenienceIndicatorType.FEE_FIXED
-      ? this.genBasicDataStructure(
+      ? this.genBasicQrStringItem(
           VietQrFieldID.CONVENIENCE_FEE_FIXED,
           this.data.convenienceFeeFixed,
         )
@@ -253,7 +297,7 @@ export class VietQRV1Builder {
 
   private genConvenienceFeePercentage(): string {
     return this.data.tipConvenienceIndicator === TipOrConvenienceIndicatorType.FEE_PERCENTAGE
-      ? this.genBasicDataStructure(
+      ? this.genBasicQrStringItem(
           VietQrFieldID.CONVENIENCE_FEE_PERCENTAGE,
           this.data.convenienceFeePercentage,
         )
@@ -261,24 +305,24 @@ export class VietQRV1Builder {
   }
 
   private genCountryCodeInfo(): string {
-    return this.genBasicDataStructure(VietQrFieldID.COUNTRY_CODE, this.data.countryCode);
+    return this.genBasicQrStringItem(VietQrFieldID.COUNTRY_CODE, this.data.countryCode);
   }
 
   private genMerchantNameInfo(): string {
-    return this.genBasicDataStructure(VietQrFieldID.MERCHANT_NAME, this.data.merchantName);
+    return this.genBasicQrStringItem(VietQrFieldID.MERCHANT_NAME, this.data.merchantName);
   }
 
   private genMerchantCityInfo(): string {
-    return this.genBasicDataStructure(VietQrFieldID.MERCHANT_CITY, this.data.merchantCity);
+    return this.genBasicQrStringItem(VietQrFieldID.MERCHANT_CITY, this.data.merchantCity);
   }
 
   private genPostalCodeInfo(): string {
-    return this.genBasicDataStructure(VietQrFieldID.POSTAL_CODE, this.data.postalCode);
+    return this.genBasicQrStringItem(VietQrFieldID.POSTAL_CODE, this.data.postalCode);
   }
 
   private genAdditionalData(): string {
     return this.data.additionalData
-      ? this.genBasicDataStructure(
+      ? this.genBasicQrStringItem(
           VietQrFieldID.ADDITIONAL_DATA,
           this.genBillNumberInfo() +
             this.genMobileNumberInfo() +
@@ -294,63 +338,63 @@ export class VietQRV1Builder {
   }
 
   private genBillNumberInfo() {
-    return this.genBasicDataStructure(
+    return this.genBasicQrStringItem(
       AdditionalDataFieldID.BILL_NUMBER,
       this.data?.additionalData?.billNumber || null,
     );
   }
 
   private genMobileNumberInfo(): string {
-    return this.genBasicDataStructure(
+    return this.genBasicQrStringItem(
       AdditionalDataFieldID.MOBILE_NUMBER,
       this.data?.additionalData?.mobileNumber || null,
     );
   }
 
   private genStoreLabelInfo(): string {
-    return this.genBasicDataStructure(
+    return this.genBasicQrStringItem(
       AdditionalDataFieldID.STORE_LABEL,
       this.data?.additionalData?.storeLabel || null,
     );
   }
 
   private genLoyaltyNumberInfo(): string {
-    return this.genBasicDataStructure(
+    return this.genBasicQrStringItem(
       AdditionalDataFieldID.LOYALTY_NUMBER,
       this.data?.additionalData?.loyaltyNumber || null,
     );
   }
 
   private genreferenceLabelInfo(): string {
-    return this.genBasicDataStructure(
+    return this.genBasicQrStringItem(
       AdditionalDataFieldID.REFERENCE_LABEL,
       this.data?.additionalData?.referenceLabel || null,
     );
   }
 
   private genCustomerLabelInfo(): string {
-    return this.genBasicDataStructure(
+    return this.genBasicQrStringItem(
       AdditionalDataFieldID.CUSTOMER_LABEL,
       this.data?.additionalData?.customerLabel || null,
     );
   }
 
   private genTerminalLabelInfo(): string {
-    return this.genBasicDataStructure(
+    return this.genBasicQrStringItem(
       AdditionalDataFieldID.TERMINAL_LABEL,
       this.data?.additionalData?.terminalLabel || null,
     );
   }
 
   private genPurposeOfTxnInfo(): string {
-    return this.genBasicDataStructure(
+    return this.genBasicQrStringItem(
       AdditionalDataFieldID.PURPOSE_OF_TRANSACTION,
       this.data?.additionalData?.purposeOfTxn || null,
     );
   }
 
   private genAdditionalConsumerDataReq(): string {
-    return this.genBasicDataStructure(
+    return this.genBasicQrStringItem(
       AdditionalDataFieldID.ADDITIONAL_CONSUMER_DATA_REQUEST,
       this.data?.additionalData?.additionalConsumerDataReq || null,
     );
@@ -358,7 +402,7 @@ export class VietQRV1Builder {
 
   private genLanguageTemplateInfo(): string {
     return this.data.languageTemplate
-      ? this.genBasicDataStructure(
+      ? this.genBasicQrStringItem(
           VietQrFieldID.LANGUAGE_TEMPLATE,
           this.genLanguagePreferenceInfo() +
             this.genLanguageMerchantNameInfo() +
@@ -368,30 +412,23 @@ export class VietQRV1Builder {
   }
 
   private genLanguagePreferenceInfo(): string {
-    return this.genBasicDataStructure(
+    return this.genBasicQrStringItem(
       LanguageTemplateFieldID.LANGUAGE_PREFERENCE,
       this.data?.languageTemplate?.preference || null,
     );
   }
 
   private genLanguageMerchantNameInfo(): string {
-    return this.genBasicDataStructure(
+    return this.genBasicQrStringItem(
       LanguageTemplateFieldID.ALTERNATE_MERCHANT_NAME,
       this.data?.languageTemplate?.merchantName || null,
     );
   }
 
   private genLanguageMerchantCityInfo(): string {
-    return this.genBasicDataStructure(
+    return this.genBasicQrStringItem(
       LanguageTemplateFieldID.ALTERNATE_MERCHANT_CITY,
       this.data?.languageTemplate?.merchantCity || null,
     );
-  }
-
-  private calcCRCCode(value: string): string {
-    const stringUtil = new StringUtil();
-    const crc = new Crc(CrcType.CRC16_CCITT_FALSE);
-    const bytes = stringUtil.getCharacterByteArrayFromString(value);
-    return crc.compute(bytes).toHexString().substr(2);
   }
 }

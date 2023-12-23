@@ -37,18 +37,17 @@ export enum AdditionalDataFieldID {
   // Hệ thống thanh toán cụ thể (50 - 99)
 }
 
-export enum AdditionalConsumerDataReq {
-  CUSTOMER_ADDRESS = 'A',
-  CUSTOMER_MOBILE = 'M',
-  CUSTOMER_EMAIL = 'E',
-}
-
 // ID của các trường dữ liệu con bên trong trường dữ liệu LANGUAGE_TEMPLATE (64)
 export enum LanguageTemplateFieldID {
   LANGUAGE_PREFERENCE = '00', // Ngôn ngữ thay thế
   ALTERNATE_MERCHANT_NAME = '01', // Tên ĐVCNTT dưới dạng Ngôn ngữthay thế
   ALTERNATE_MERCHANT_CITY = '02', // Thành phố dưới dạng ngôn ngữ thay thế
   // RFU for EMVCo (03 - 99)
+}
+
+export enum BeneficaryOrganizationFieldID {
+  ACQUIER_ID = '00', // ID Tổ chức thụ hưởng
+  MERCHANT_ID = '01', // Tài khoản thụ hưởng
 }
 
 export enum VietQrVersion {
@@ -66,9 +65,10 @@ export enum MerchantAccInfoFieldID {
   SERVICE_CODE = '02', // Mã dịch vụ (dịch vụ chuyển khoản qua thẻ / số tài khoản)
 }
 
-export enum BeneficaryOrganizationFieldID {
-  ACQUIER_ID = '00', // ID Tổ chức thụ hưởng
-  MERCHANT_ID = '01', // Tài khoản thụ hưởng
+export enum AdditionalConsumerDataReq {
+  CUSTOMER_ADDRESS = 'A',
+  CUSTOMER_MOBILE = 'M',
+  CUSTOMER_EMAIL = 'E',
 }
 
 export enum ServiceCode {
@@ -134,12 +134,12 @@ export type StringOrNot = string | null | undefined;
 export type NumberOrNot = number | null | undefined;
 
 export interface IBeneficiaryOrganiation {
-  acquierId: string; // ID 38 - 01 - 00 (Required Field)
+  acquierId: BankBIN | string; // ID 38 - 01 - 00 (Required Field)
   merchantId: string; // ID 38 - 01 - 01 (Required Field)
 }
 
 export interface IMerchantAccountInfo {
-  guid?: GUID; // ID 38 - 00 (Required Field)
+  guid?: GUID | string; // ID 38 - 00 (Required Field)
   beneficiaryOrg: IBeneficiaryOrganiation; // ID 38 - 01 (Required Field)
   serviceCode?: ServiceCode; // ID 38 - 02 (Conditional Field)
 }
@@ -166,10 +166,10 @@ export interface IVietQrDataV1 {
   version: VietQrVersion; // ID 00
   initMethod: VietQrInitiateMethod; // ID 01
   merchantAccInfo: IMerchantAccountInfo; // ID = 38
-  merchantCategoryCode?: MerchantCategoryCode | null | undefined; // ID 52
+  merchantCategoryCode?: MerchantCategoryCode | string | null | undefined; // ID 52
   txnCurrency: number; // ID 53
   txnAmount: string; // ID 54
-  tipConvenienceIndicator?: TipOrConvenienceIndicatorType | null | undefined; // ID 55
+  tipConvenienceIndicator?: TipOrConvenienceIndicatorType | string | null | undefined; // ID 55
   convenienceFeeFixed?: StringOrNot; // ID 56
   convenienceFeePercentage?: StringOrNot; // ID 57
   countryCode: string; // ID 58
@@ -187,4 +187,57 @@ export interface IBasicVietQrData {
   serviceCode?: ServiceCode;
   amount?: number;
   txnDescription?: string;
+}
+
+// Define field name for decrypt qr string
+
+export enum VietQRFieldName {
+  VERSION = 'version', // Phiên bản dữ liệu của mã QR
+  INITIAL_METHOD = 'initial method', // Phương thức khởi tạo
+  MERCHANT_ACCOUNT_INFO = 'merchant account information', // Thông tin định danh ĐVCNTT
+  MERCHANT_CATEGORY_CODE = 'merchant category code', // Mã danh mục ĐVCNTT
+  TRANSACTION_CURRENCY = 'currency', // Mã tiền tệ
+  TRANSACTION_AMOUNT = 'amount', // Số tiền GD
+  TIP_OR_CONVENIENCE_INDICATOR = 'tip or convenience indicator', // Chỉ thị cho Tip và Phí GD
+  CONVENIENCE_FEE_FIXED = 'value of convenience fee fixed', // Giá trị phí cố định
+  CONVENIENCE_FEE_PERCENTAGE = 'value of convenience fee percentage', // Giá trị phí theo tỷ lệ phần trăm
+  COUNTRY_CODE = 'country code', // Mã quốc gia
+  MERCHANT_NAME = 'merchant Name', // Tên đơn vị chấp nhận thanh toán (ĐVCNTT)
+  MERCHANT_CITY = 'merchant city', // Thành phố của ĐVCNTT
+  POSTAL_CODE = 'postal code', // Mã bưu điện
+  ADDITIONAL_DATA = 'additional Data', // Thông tin bổ sung
+  LANGUAGE_TEMPLATE = 'language template', // Ngôn ngữ thay thế
+  CRC_CODE = 'crc checksum', // Mã checksum (Cyclic Redundancy Check)
+}
+
+export enum MerchantAccInfoFieldName {
+  GUID = 'guid', // GUID định danh toàn cầu
+  BENEFICIARY_ORGANIZATION = 'beneficiary Organization', // Tổ chức thụ hưởng(NHTV, TGTT)
+  SERVICE_CODE = 'service code', // Mã dịch vụ (dịch vụ chuyển khoản qua thẻ / số tài khoản)
+}
+
+export enum BeneficaryOrganizationFieldName {
+  ACQUIER_ID = 'acquirer ID', // ID Tổ chức thụ hưởng
+  MERCHANT_ID = 'merchant ID', // Tài khoản thụ hưởng
+}
+
+export enum AdditionalDataFieldName {
+  BILL_NUMBER = 'bill Number', // Số hóa đơn
+  MOBILE_NUMBER = 'mobile Number', // Số điện thoại đi động
+  STORE_LABEL = 'store Label', // Mã cửa hàng
+  LOYALTY_NUMBER = 'loyalty Number', // Mã khách hàng thân thiết
+  REFERENCE_LABEL = 'reference Label', // Mã tham chiếu
+  CUSTOMER_LABEL = 'customer Label', // Mã khách hàng
+  TERMINAL_LABEL = 'terminal Label', // Mã số điểm bán hàng
+  PURPOSE_OF_TRANSACTION = 'purpose of transaction', // Mục đích giao dịch
+  ADDITIONAL_CONSUMER_DATA_REQUEST = 'additional Consumer Data Request', // Yêu cầu dữ liệu KH bổ sung
+  // RFU for EMVCo Đăng ký bởi EMVCo (10 - 49)
+  // Hệ thống thanh toán cụ thể (50 - 99)
+}
+
+export enum LanguageTemplateFieldName {
+  LANGUAGE_PREFERENCE = 'preference', // Ngôn ngữ thay thế
+  ALTERNATE_MERCHANT_NAME = 'merchant name', // Tên ĐVCNTT dưới dạng Ngôn ngữthay thế
+  ALTERNATE_MERCHANT_CITY = 'merchant city', // Thành phố dưới dạng ngôn ngữ thay thế
+  // RFU for EMVCo (03 - 99)
 }

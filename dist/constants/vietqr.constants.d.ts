@@ -28,15 +28,14 @@ export declare enum AdditionalDataFieldID {
     PURPOSE_OF_TRANSACTION = "08",
     ADDITIONAL_CONSUMER_DATA_REQUEST = "09"
 }
-export declare enum AdditionalConsumerDataReq {
-    CUSTOMER_ADDRESS = "A",
-    CUSTOMER_MOBILE = "M",
-    CUSTOMER_EMAIL = "E"
-}
 export declare enum LanguageTemplateFieldID {
     LANGUAGE_PREFERENCE = "00",
     ALTERNATE_MERCHANT_NAME = "01",
     ALTERNATE_MERCHANT_CITY = "02"
+}
+export declare enum BeneficaryOrganizationFieldID {
+    ACQUIER_ID = "00",
+    MERCHANT_ID = "01"
 }
 export declare enum VietQrVersion {
     V1 = "01"
@@ -50,9 +49,10 @@ export declare enum MerchantAccInfoFieldID {
     BENEFICIARY_ORGANIZATION = "01",
     SERVICE_CODE = "02"
 }
-export declare enum BeneficaryOrganizationFieldID {
-    ACQUIER_ID = "00",
-    MERCHANT_ID = "01"
+export declare enum AdditionalConsumerDataReq {
+    CUSTOMER_ADDRESS = "A",
+    CUSTOMER_MOBILE = "M",
+    CUSTOMER_EMAIL = "E"
 }
 export declare enum ServiceCode {
     BY_PRODUCT_PAYMENT_SERVICE = "QRPUSH",
@@ -107,14 +107,14 @@ export declare enum TipOrConvenienceIndicatorType {
 }
 export declare const DEFAULT_CURRENCY: any;
 export declare const DEFAULT_COUNTRY_CODE: any;
-export declare type StringOrNot = string | null | undefined;
-export declare type NumberOrNot = number | null | undefined;
+export type StringOrNot = string | null | undefined;
+export type NumberOrNot = number | null | undefined;
 export interface IBeneficiaryOrganiation {
-    acquierId: string;
+    acquierId: BankBIN | string;
     merchantId: string;
 }
 export interface IMerchantAccountInfo {
-    guid?: GUID;
+    guid?: GUID | string;
     beneficiaryOrg: IBeneficiaryOrganiation;
     serviceCode?: ServiceCode;
 }
@@ -138,10 +138,10 @@ export interface IVietQrDataV1 {
     version: VietQrVersion;
     initMethod: VietQrInitiateMethod;
     merchantAccInfo: IMerchantAccountInfo;
-    merchantCategoryCode?: MerchantCategoryCode | null | undefined;
+    merchantCategoryCode?: MerchantCategoryCode | string | null | undefined;
     txnCurrency: number;
     txnAmount: string;
-    tipConvenienceIndicator?: TipOrConvenienceIndicatorType | null | undefined;
+    tipConvenienceIndicator?: TipOrConvenienceIndicatorType | string | null | undefined;
     convenienceFeeFixed?: StringOrNot;
     convenienceFeePercentage?: StringOrNot;
     countryCode: string;
@@ -158,4 +158,47 @@ export interface IBasicVietQrData {
     serviceCode?: ServiceCode;
     amount?: number;
     txnDescription?: string;
+}
+export declare enum VietQRFieldName {
+    VERSION = "version",
+    INITIAL_METHOD = "initialMethod",
+    MERCHANT_ACCOUNT_INFO = "merchantAccInfo",
+    MERCHANT_CATEGORY_CODE = "mcc",
+    TRANSACTION_CURRENCY = "currency",
+    TRANSACTION_AMOUNT = "amount",
+    TIP_OR_CONVENIENCE_INDICATOR = "tipConvenienceIndicator",
+    CONVENIENCE_FEE_FIXED = "convenienceFeeFixed",
+    CONVENIENCE_FEE_PERCENTAGE = "convenienceFeePercentage",
+    COUNTRY_CODE = "countryCode",
+    MERCHANT_NAME = "merchantName",
+    MERCHANT_CITY = "merchantCity",
+    POSTAL_CODE = "postalCode",
+    ADDITIONAL_DATA = "additionalData",
+    LANGUAGE_TEMPLATE = "languageTemplate",
+    CRC_CODE = "crcCode"
+}
+export declare enum MerchantAccInfoFieldName {
+    GUID = "guid",
+    BENEFICIARY_ORGANIZATION = "benificiaryOrg",
+    SERVICE_CODE = "serviceCode"
+}
+export declare enum BeneficaryOrganizationFieldName {
+    ACQUIER_ID = "acquirerId",
+    MERCHANT_ID = "merchantId"
+}
+export declare enum AdditionalDataFieldName {
+    BILL_NUMBER = "billNumber",
+    MOBILE_NUMBER = "mobileNumber",
+    STORE_LABEL = "storeLabel",
+    LOYALTY_NUMBER = "loyaltyNumber",
+    REFERENCE_LABEL = "referenceLabel",
+    CUSTOMER_LABEL = "customerLabel",
+    TERMINAL_LABEL = "terminalLabel",
+    PURPOSE_OF_TRANSACTION = "purposeOfTxn",
+    ADDITIONAL_CONSUMER_DATA_REQUEST = "additionalConsumerDataReq"
+}
+export declare enum LanguageTemplateFieldName {
+    LANGUAGE_PREFERENCE = "preference",
+    ALTERNATE_MERCHANT_NAME = "merchantName",
+    ALTERNATE_MERCHANT_CITY = "merchantCity"
 }

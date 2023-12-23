@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.VietQRV1Builder = void 0;
 const index_1 = require("../constants/index");
 const utils_1 = require("../utils");
-const crc_helper_1 = require("../crc.helper");
 class VietQRV1Builder {
     constructor() {
         this.initData();
@@ -46,6 +45,18 @@ class VietQRV1Builder {
         };
         return this;
     }
+    setMerchantName(merchantName) {
+        this.data.merchantName = merchantName;
+        return this;
+    }
+    setMerchantCity(merchantCity) {
+        this.data.merchantCity = merchantCity;
+        return this;
+    }
+    setPostalCode(postalCode) {
+        this.data.postalCode = postalCode;
+        return this;
+    }
     setTxnAmount(amount) {
         this.data.txnAmount = amount.toString();
         this.data.initMethod = index_1.VietQrInitiateMethod.DYNAMIC;
@@ -53,6 +64,7 @@ class VietQRV1Builder {
     }
     setTxnDescription(description) {
         this.data.additionalData = Object.assign(Object.assign({}, this.data.additionalData), { purposeOfTxn: description });
+        return this;
     }
     setTxnCurrency(currencyCode = index_1.DEFAULT_CURRENCY) {
         this.data.txnCurrency = currencyCode;
@@ -62,8 +74,21 @@ class VietQRV1Builder {
         this.data.countryCode = countryCode;
         return this;
     }
+    setAdditionalData(additionalData) {
+        this.data.additionalData = Object.assign(Object.assign({}, this.data.additionalData), additionalData);
+        return this;
+    }
+    setLanguageTemplate(languageTemplate) {
+        this.data.languageTemplate = languageTemplate;
+        return this;
+    }
+    setmerchantCategoryCode(mcc) {
+        this.data.merchantCategoryCode = mcc;
+        return this;
+    }
     refresh() {
         this.initData();
+        return this;
     }
     quickBuild(input) {
         const { acquierId, merchantId, serviceCode = index_1.ServiceCode.BY_ACCOUNT_NUMBER, amount, txnDescription, } = input;
@@ -98,7 +123,7 @@ class VietQRV1Builder {
             this.genLanguageTemplateInfo() +
             index_1.VietQrFieldID.CRC_CODE +
             '04';
-        this.qrCodeString = `${dataStr}${this.calcCRCCode(dataStr)}`;
+        this.qrCodeString = `${dataStr}${(0, utils_1.calcCrcCheckSum)(dataStr)}`;
         return this;
     }
     getQrCodeString() {
@@ -112,72 +137,72 @@ class VietQRV1Builder {
             console.error(err);
         }
     }
-    genBasicDataStructure(fieldID, dt) {
-        return dt ? `${fieldID}${(0, utils_1.genDataLength)(dt)}${dt}` : '';
+    genBasicQrStringItem(fieldID, dt) {
+        return dt ? `${fieldID}${(0, utils_1.calcQrItemDataLength)(dt)}${dt}` : '';
     }
     genVersion() {
-        return this.genBasicDataStructure(index_1.VietQrFieldID.VERSION, this.data.version);
+        return this.genBasicQrStringItem(index_1.VietQrFieldID.VERSION, this.data.version);
     }
     genInitMethod() {
-        return this.genBasicDataStructure(index_1.VietQrFieldID.INITIAL_METHOD, this.data.initMethod);
+        return this.genBasicQrStringItem(index_1.VietQrFieldID.INITIAL_METHOD, this.data.initMethod);
     }
     genMerchantAccInfo() {
-        return this.genBasicDataStructure(index_1.VietQrFieldID.MERCHANT_ACCOUNT_INFO, this.genGUIDInfo() + this.genBeneficiaryOrg() + this.genServiceCodeInfo());
+        return this.genBasicQrStringItem(index_1.VietQrFieldID.MERCHANT_ACCOUNT_INFO, this.genGUIDInfo() + this.genBeneficiaryOrg() + this.genServiceCodeInfo());
     }
     genGUIDInfo() {
-        return this.genBasicDataStructure(index_1.MerchantAccInfoFieldID.GUID, this.data.merchantAccInfo.guid);
+        return this.genBasicQrStringItem(index_1.MerchantAccInfoFieldID.GUID, this.data.merchantAccInfo.guid);
     }
     genBeneficiaryOrg() {
-        return this.genBasicDataStructure(index_1.MerchantAccInfoFieldID.BENEFICIARY_ORGANIZATION, this.genAcquierInfo() + this.genMerchantIdInfo());
+        return this.genBasicQrStringItem(index_1.MerchantAccInfoFieldID.BENEFICIARY_ORGANIZATION, this.genAcquierInfo() + this.genMerchantIdInfo());
     }
     genAcquierInfo() {
-        return this.genBasicDataStructure(index_1.BeneficaryOrganizationFieldID.ACQUIER_ID, this.data.merchantAccInfo.beneficiaryOrg.acquierId);
+        return this.genBasicQrStringItem(index_1.BeneficaryOrganizationFieldID.ACQUIER_ID, this.data.merchantAccInfo.beneficiaryOrg.acquierId);
     }
     genMerchantIdInfo() {
-        return this.genBasicDataStructure(index_1.BeneficaryOrganizationFieldID.MERCHANT_ID, this.data.merchantAccInfo.beneficiaryOrg.merchantId);
+        return this.genBasicQrStringItem(index_1.BeneficaryOrganizationFieldID.MERCHANT_ID, this.data.merchantAccInfo.beneficiaryOrg.merchantId);
     }
     genServiceCodeInfo() {
-        return this.genBasicDataStructure(index_1.MerchantAccInfoFieldID.SERVICE_CODE, this.data.merchantAccInfo.serviceCode);
+        return this.genBasicQrStringItem(index_1.MerchantAccInfoFieldID.SERVICE_CODE, this.data.merchantAccInfo.serviceCode);
     }
     genCategoryCodeInfo() {
-        return this.genBasicDataStructure(index_1.VietQrFieldID.MERCHANT_CATEGORY_CODE, this.data.merchantCategoryCode);
+        return this.genBasicQrStringItem(index_1.VietQrFieldID.MERCHANT_CATEGORY_CODE, this.data.merchantCategoryCode);
     }
     genCurrencyInfo() {
-        return this.genBasicDataStructure(index_1.VietQrFieldID.TRANSACTION_CURRENCY, this.data.txnCurrency);
+        return this.genBasicQrStringItem(index_1.VietQrFieldID.TRANSACTION_CURRENCY, this.data.txnCurrency);
     }
     genAmountInfo() {
-        return this.genBasicDataStructure(index_1.VietQrFieldID.TRANSACTION_AMOUNT, this.data.txnAmount);
+        return this.genBasicQrStringItem(index_1.VietQrFieldID.TRANSACTION_AMOUNT, this.data.txnAmount);
     }
     genTipOrConvenienceIndicatorInfo() {
-        return (this.genBasicDataStructure(index_1.VietQrFieldID.TIP_OR_CONVENIENCE_INDICATOR, this.data.tipConvenienceIndicator) +
+        return (this.genBasicQrStringItem(index_1.VietQrFieldID.TIP_OR_CONVENIENCE_INDICATOR, this.data.tipConvenienceIndicator) +
             this.genConvenienceFeeFixed() +
             this.genConvenienceFeePercentage());
     }
     genConvenienceFeeFixed() {
         return this.data.tipConvenienceIndicator === index_1.TipOrConvenienceIndicatorType.FEE_FIXED
-            ? this.genBasicDataStructure(index_1.VietQrFieldID.CONVENIENCE_FEE_FIXED, this.data.convenienceFeeFixed)
+            ? this.genBasicQrStringItem(index_1.VietQrFieldID.CONVENIENCE_FEE_FIXED, this.data.convenienceFeeFixed)
             : '';
     }
     genConvenienceFeePercentage() {
         return this.data.tipConvenienceIndicator === index_1.TipOrConvenienceIndicatorType.FEE_PERCENTAGE
-            ? this.genBasicDataStructure(index_1.VietQrFieldID.CONVENIENCE_FEE_PERCENTAGE, this.data.convenienceFeePercentage)
+            ? this.genBasicQrStringItem(index_1.VietQrFieldID.CONVENIENCE_FEE_PERCENTAGE, this.data.convenienceFeePercentage)
             : '';
     }
     genCountryCodeInfo() {
-        return this.genBasicDataStructure(index_1.VietQrFieldID.COUNTRY_CODE, this.data.countryCode);
+        return this.genBasicQrStringItem(index_1.VietQrFieldID.COUNTRY_CODE, this.data.countryCode);
     }
     genMerchantNameInfo() {
-        return this.genBasicDataStructure(index_1.VietQrFieldID.MERCHANT_NAME, this.data.merchantName);
+        return this.genBasicQrStringItem(index_1.VietQrFieldID.MERCHANT_NAME, this.data.merchantName);
     }
     genMerchantCityInfo() {
-        return this.genBasicDataStructure(index_1.VietQrFieldID.MERCHANT_CITY, this.data.merchantCity);
+        return this.genBasicQrStringItem(index_1.VietQrFieldID.MERCHANT_CITY, this.data.merchantCity);
     }
     genPostalCodeInfo() {
-        return this.genBasicDataStructure(index_1.VietQrFieldID.POSTAL_CODE, this.data.postalCode);
+        return this.genBasicQrStringItem(index_1.VietQrFieldID.POSTAL_CODE, this.data.postalCode);
     }
     genAdditionalData() {
         return this.data.additionalData
-            ? this.genBasicDataStructure(index_1.VietQrFieldID.ADDITIONAL_DATA, this.genBillNumberInfo() +
+            ? this.genBasicQrStringItem(index_1.VietQrFieldID.ADDITIONAL_DATA, this.genBillNumberInfo() +
                 this.genMobileNumberInfo() +
                 this.genStoreLabelInfo() +
                 this.genLoyaltyNumberInfo() +
@@ -190,64 +215,58 @@ class VietQRV1Builder {
     }
     genBillNumberInfo() {
         var _a, _b;
-        return this.genBasicDataStructure(index_1.AdditionalDataFieldID.BILL_NUMBER, ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.additionalData) === null || _b === void 0 ? void 0 : _b.billNumber) || null);
+        return this.genBasicQrStringItem(index_1.AdditionalDataFieldID.BILL_NUMBER, ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.additionalData) === null || _b === void 0 ? void 0 : _b.billNumber) || null);
     }
     genMobileNumberInfo() {
         var _a, _b;
-        return this.genBasicDataStructure(index_1.AdditionalDataFieldID.MOBILE_NUMBER, ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.additionalData) === null || _b === void 0 ? void 0 : _b.mobileNumber) || null);
+        return this.genBasicQrStringItem(index_1.AdditionalDataFieldID.MOBILE_NUMBER, ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.additionalData) === null || _b === void 0 ? void 0 : _b.mobileNumber) || null);
     }
     genStoreLabelInfo() {
         var _a, _b;
-        return this.genBasicDataStructure(index_1.AdditionalDataFieldID.STORE_LABEL, ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.additionalData) === null || _b === void 0 ? void 0 : _b.storeLabel) || null);
+        return this.genBasicQrStringItem(index_1.AdditionalDataFieldID.STORE_LABEL, ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.additionalData) === null || _b === void 0 ? void 0 : _b.storeLabel) || null);
     }
     genLoyaltyNumberInfo() {
         var _a, _b;
-        return this.genBasicDataStructure(index_1.AdditionalDataFieldID.LOYALTY_NUMBER, ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.additionalData) === null || _b === void 0 ? void 0 : _b.loyaltyNumber) || null);
+        return this.genBasicQrStringItem(index_1.AdditionalDataFieldID.LOYALTY_NUMBER, ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.additionalData) === null || _b === void 0 ? void 0 : _b.loyaltyNumber) || null);
     }
     genreferenceLabelInfo() {
         var _a, _b;
-        return this.genBasicDataStructure(index_1.AdditionalDataFieldID.REFERENCE_LABEL, ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.additionalData) === null || _b === void 0 ? void 0 : _b.referenceLabel) || null);
+        return this.genBasicQrStringItem(index_1.AdditionalDataFieldID.REFERENCE_LABEL, ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.additionalData) === null || _b === void 0 ? void 0 : _b.referenceLabel) || null);
     }
     genCustomerLabelInfo() {
         var _a, _b;
-        return this.genBasicDataStructure(index_1.AdditionalDataFieldID.CUSTOMER_LABEL, ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.additionalData) === null || _b === void 0 ? void 0 : _b.customerLabel) || null);
+        return this.genBasicQrStringItem(index_1.AdditionalDataFieldID.CUSTOMER_LABEL, ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.additionalData) === null || _b === void 0 ? void 0 : _b.customerLabel) || null);
     }
     genTerminalLabelInfo() {
         var _a, _b;
-        return this.genBasicDataStructure(index_1.AdditionalDataFieldID.TERMINAL_LABEL, ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.additionalData) === null || _b === void 0 ? void 0 : _b.terminalLabel) || null);
+        return this.genBasicQrStringItem(index_1.AdditionalDataFieldID.TERMINAL_LABEL, ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.additionalData) === null || _b === void 0 ? void 0 : _b.terminalLabel) || null);
     }
     genPurposeOfTxnInfo() {
         var _a, _b;
-        return this.genBasicDataStructure(index_1.AdditionalDataFieldID.PURPOSE_OF_TRANSACTION, ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.additionalData) === null || _b === void 0 ? void 0 : _b.purposeOfTxn) || null);
+        return this.genBasicQrStringItem(index_1.AdditionalDataFieldID.PURPOSE_OF_TRANSACTION, ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.additionalData) === null || _b === void 0 ? void 0 : _b.purposeOfTxn) || null);
     }
     genAdditionalConsumerDataReq() {
         var _a, _b;
-        return this.genBasicDataStructure(index_1.AdditionalDataFieldID.ADDITIONAL_CONSUMER_DATA_REQUEST, ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.additionalData) === null || _b === void 0 ? void 0 : _b.additionalConsumerDataReq) || null);
+        return this.genBasicQrStringItem(index_1.AdditionalDataFieldID.ADDITIONAL_CONSUMER_DATA_REQUEST, ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.additionalData) === null || _b === void 0 ? void 0 : _b.additionalConsumerDataReq) || null);
     }
     genLanguageTemplateInfo() {
         return this.data.languageTemplate
-            ? this.genBasicDataStructure(index_1.VietQrFieldID.LANGUAGE_TEMPLATE, this.genLanguagePreferenceInfo() +
+            ? this.genBasicQrStringItem(index_1.VietQrFieldID.LANGUAGE_TEMPLATE, this.genLanguagePreferenceInfo() +
                 this.genLanguageMerchantNameInfo() +
                 this.genLanguageMerchantCityInfo())
             : '';
     }
     genLanguagePreferenceInfo() {
         var _a, _b;
-        return this.genBasicDataStructure(index_1.LanguageTemplateFieldID.LANGUAGE_PREFERENCE, ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.languageTemplate) === null || _b === void 0 ? void 0 : _b.preference) || null);
+        return this.genBasicQrStringItem(index_1.LanguageTemplateFieldID.LANGUAGE_PREFERENCE, ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.languageTemplate) === null || _b === void 0 ? void 0 : _b.preference) || null);
     }
     genLanguageMerchantNameInfo() {
         var _a, _b;
-        return this.genBasicDataStructure(index_1.LanguageTemplateFieldID.ALTERNATE_MERCHANT_NAME, ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.languageTemplate) === null || _b === void 0 ? void 0 : _b.merchantName) || null);
+        return this.genBasicQrStringItem(index_1.LanguageTemplateFieldID.ALTERNATE_MERCHANT_NAME, ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.languageTemplate) === null || _b === void 0 ? void 0 : _b.merchantName) || null);
     }
     genLanguageMerchantCityInfo() {
         var _a, _b;
-        return this.genBasicDataStructure(index_1.LanguageTemplateFieldID.ALTERNATE_MERCHANT_CITY, ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.languageTemplate) === null || _b === void 0 ? void 0 : _b.merchantCity) || null);
-    }
-    calcCRCCode(value) {
-        const stringUtil = new utils_1.StringUtil();
-        const crc = new crc_helper_1.Crc(crc_helper_1.CrcType.CRC16_CCITT_FALSE);
-        const bytes = stringUtil.getCharacterByteArrayFromString(value);
-        return crc.compute(bytes).toHexString().substr(2);
+        return this.genBasicQrStringItem(index_1.LanguageTemplateFieldID.ALTERNATE_MERCHANT_CITY, ((_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.languageTemplate) === null || _b === void 0 ? void 0 : _b.merchantCity) || null);
     }
 }
 exports.VietQRV1Builder = VietQRV1Builder;

@@ -1,6 +1,17 @@
-import {countries, currencies} from 'country-data';
+import { countries, currencies } from 'country-data';
+import { crc16ccitt } from 'crc';
 import * as QRCode from 'qrcode';
 import {createCanvas, loadImage} from 'canvas';
+import { ServiceCode, TipOrConvenienceIndicatorType } from '../constants';
+import * as _ from 'lodash';
+
+export function getEnumKeys<T extends string | number>(e: Record<string, T>): string[] {
+  return _.difference(_.keys(e), _.map(_.filter(_.values(e), _.isNumber), _.toString));
+}
+
+export function getEnumValues<T extends string | number>(e: Record<string, T>): T[] {
+  return _.values(_.pick(e, getEnumKeys(e)));
+}
 
 export function isValidCountryCode(countryCode: string): boolean {
   return !!countries[countryCode];
@@ -10,258 +21,47 @@ export function isValidCurrencyCode(currencyCode: string | number): boolean {
   return !!currencies[currencyCode];
 }
 
-export function convertCurrencyCode2Number(currencyCode: string): number {
-  return isValidCurrencyCode(currencyCode) ? currencies[currencyCode].number : 0;
+export function isServiceCode(serviceCode: string): boolean {
+  return (getEnumValues(ServiceCode) as string[]).includes(serviceCode);
 }
 
-export function genDataLength(data: string | number): string {
+export function isNumeric(value: string): boolean {
+  return /^(\d)*$/.test(value);
+}
+
+// only support check value with max 2 gigits after decimal separator(currency code: 458 - MYR of Malaysia)
+export function isFloatingPointAmount(value: string): boolean {
+  return /^(0\.[1-9]|0\.\d[1-9]|[1-9](\d+)?(\.\d{0,2})?)$/.test(value);
+}
+
+export function isANS(value: string): boolean {
+  return /^[\x20-\x7E\xA0-\xA3\xA5\xA7\xA9-\xB3\xB5-\xB7\xB9-\xBB\xBF-\xFF\u20AC\u0160\u0161\u017D\u017E\u0152\u0153\u0178]*$/.test(
+    value,
+  );
+}
+
+export function isAN(value: string): boolean {
+  return /^[a-zA-Z0-9]+$/.test(value);
+}
+
+export function isValidChecksum(rawValue: string): boolean {
+  const calculateString = rawValue.substring(0, rawValue.length - 4);
+  const checkSumValue = rawValue.substring(rawValue.length - 4);
+  return parseInt(calcCrcCheckSum(calculateString), 16) === parseInt(checkSumValue, 16);
+}
+
+export function calcQrItemDataLength(data: string | number): string {
   return typeof data === 'string' || typeof data === 'number'
     ? (('' + data).length + '').padStart(2, '0')
     : '';
 }
 
-export class StringUtil {
-  private lastErrToken;
-
-  public getLastErrorToken() {
-    return this.lastErrToken;
-  }
-
-  public getCharacterByteArrayFromString(str) {
-    let bytes = [];
-    for (let i = 0; i < str.length; i++) {
-      let charVal = str.charCodeAt(i);
-      if (charVal < 256) {
-        bytes[i] = str.charCodeAt(i);
-      }
-    }
-    return bytes;
-  }
-
-  public getNumberAsHexStr(num: number): string {
-    return '0x' + num.toString(16).toUpperCase();
-  }
-
-  public getNumberAsHexStrWidthBits(num: number, widthInBits): string {
-    let tempStr = num.toString(16).toUpperCase();
-    while (tempStr.length < widthInBits >> 2) {
-      tempStr = '0' + tempStr;
-    }
-
-    return '0x' + tempStr;
-  }
-
-  public getNumberAsHexStr32(num: number): string {
-    let valueHigh = num >>> 16;
-    let valueLow = num & 0x0000ffff;
-    return '0x' + valueHigh.toString(16).toUpperCase() + valueLow.toString(16).toUpperCase();
-  }
-
-  public getNumberAsHexStr32FixedWidth(num: number): string {
-    let valueHigh = (num >>> 16).toString(16).toUpperCase();
-    while (valueHigh.length < 4) {
-      valueHigh = '0' + valueHigh;
-    }
-
-    let valueLow = (num & 0x0000ffff).toString(16).toUpperCase();
-    while (valueLow.length < 4) {
-      valueLow = '0' + valueLow;
-    }
-
-    return '0x' + valueHigh + valueLow;
-  }
-
-  public getCharacterByteArrayFromByteString(str: string): any[] {
-    let bytes = [];
-    let bytePos = 0;
-    let splitStr = str.split(/\s+/);
-    for (let i = 0; i < splitStr.length; i++) {
-      let byteStr = splitStr[i];
-      if (byteStr.substr(0, 2) === '0x') {
-        byteStr = byteStr.substr(2, byteStr.length - 2);
-      }
-
-      if (byteStr === ' ' || byteStr === '') continue;
-
-      let b = parseInt(byteStr, 16);
-      if (b === NaN || b === undefined) {
-        this.lastErrToken = byteStr;
-        return undefined;
-      } else {
-        if (b < 256) {
-          bytes[bytePos] = b;
-          bytePos++;
-        } else {
-          this.lastErrToken = byteStr;
-          return undefined;
-        }
-      }
-    }
-
-    return bytes;
-  }
-
-  static isBinaryString(s) {
-    for (let i = 0; i < s.length; i++) {
-      if (!(s[i] == '0' || s[i] == '1')) return false;
-    }
-    return true;
-  }
-
-  getCharacterByteArrayFromBinaryString(str) {
-    let bytes = [];
-    let parts = str.split(/\s+/);
-    for (let strIdx = 0; strIdx < parts.length; strIdx++) {
-      let strPart = parts[strIdx];
-      while (strPart.length < 8) {
-        strPart = '0' + strPart;
-      }
-      if (!StringUtil.isBinaryString(strPart)) {
-        this.lastErrToken = strPart;
-        return undefined;
-      }
-      let num = 0;
-      for (let i = 0; i < 8; i++) {
-        if (strPart[i] == '1') {
-          num = num + (1 << (7 - i));
-        }
-      }
-      bytes.push(num);
-    }
-
-    return bytes;
-  }
+export function calcCrcCheckSum(value: string): string {
+  return crc16ccitt(value).toString(16).toUpperCase();
 }
 
-export class UInt64 {
-  private highVal;
-  private lowVal;
-
-  constructor(numOrUint64: number | UInt64, lowVal?: number) {
-    if (typeof numOrUint64 === 'number') {
-      this.highVal = numOrUint64 & 0xffffffff;
-      this.lowVal = lowVal & 0xffffffff;
-    } else {
-      this.highVal = numOrUint64.highVal;
-      this.lowVal = numOrUint64.lowVal;
-    }
-  }
-
-  public clone() {
-    return new UInt64(this);
-  }
-
-  static fromString(strHigh: string, strLow?: string) {
-    let numHigh = 0,
-      numLow = 0;
-    if (strLow == undefined) {
-      /* the first parameter string contains the whole number */
-      /* remove preceeding '0x' prefix */
-      if (strHigh.substr(0, 2) === '0x') {
-        strHigh = strHigh.substr(2, strHigh.length - 2);
-      }
-      /* pad to full 16 digits */
-      while (strHigh.length < 16) {
-        strHigh = '0' + strHigh;
-      }
-      numHigh = parseInt(strHigh.substr(0, 8), 16);
-      numLow = parseInt(strHigh.substr(8, 15), 16);
-    } else {
-      /* two 32bit numbers are provided */
-      /* handle high part */
-      /* remove preceeding '0x' prefix */
-      if (strHigh.substr(0, 2) === '0x') {
-        strHigh = strHigh.substr(2, strHigh.length - 2);
-      }
-      /* pad to full 8 digits */
-      while (strHigh.length < 8) {
-        strHigh = '0' + strHigh;
-      }
-      numHigh = parseInt(strHigh, 16);
-      /* handle low part */
-      /* remove preceeding '0x' prefix */
-      if (strLow.substr(0, 2) === '0x') {
-        strLow = strLow.substr(2, strLow.length - 2);
-      }
-      /* pad to full 8 digits */
-      while (strLow.length < 8) {
-        strLow = '0' + strLow;
-      }
-      numLow = parseInt(strLow, 16);
-    }
-    return new UInt64(numHigh, numLow);
-  }
-
-  public and(otherUInt64OrNumber) {
-    if (typeof otherUInt64OrNumber === 'number') {
-      this.highVal = 0;
-      this.lowVal = this.lowVal & otherUInt64OrNumber;
-    } else {
-      this.highVal = this.highVal & otherUInt64OrNumber.highVal;
-      this.lowVal = this.lowVal & otherUInt64OrNumber.lowVal;
-    }
-    return this;
-  }
-
-  public shl(dist) {
-    for (let i = 0; i < dist; i++) {
-      this.highVal = this.highVal << 1;
-      if ((this.lowVal & 0x80000000) != 0) {
-        this.highVal |= 0x01;
-      }
-      this.lowVal = this.lowVal << 1;
-    }
-    return this;
-  }
-
-  public shr(dist) {
-    for (let i = 0; i < dist; i++) {
-      this.lowVal = this.lowVal >>> 1;
-      if ((this.highVal & 0x00000001) != 0) {
-        this.lowVal |= 0x80000000;
-      }
-      this.highVal = this.highVal >>> 1;
-    }
-    return this;
-  }
-
-  public isZero() {
-    return this.highVal == 0 && this.lowVal == 0;
-  }
-
-  public xor(otherUInt64) {
-    this.highVal = this.highVal ^ otherUInt64.highVal;
-    this.lowVal = this.lowVal ^ otherUInt64.lowVal;
-    return this;
-  }
-
-  public reflect() {
-    let newHighVal = 0,
-      newLowVal = 0;
-    for (let i = 0; i < 32; i++) {
-      if ((this.highVal & (1 << (31 - i))) != 0) {
-        newLowVal |= 1 << i;
-      }
-      if ((this.lowVal & (1 << i)) != 0) {
-        newHighVal |= 1 << (31 - i);
-      }
-    }
-    this.lowVal = newLowVal;
-    this.highVal = newHighVal;
-    return this;
-  }
-
-  public toHexString = function () {
-    let str = '';
-    let stringUtil = new StringUtil();
-    str += stringUtil.getNumberAsHexStr32FixedWidth(this.highVal);
-    str += stringUtil.getNumberAsHexStr32FixedWidth(this.lowVal).substring(2, 10);
-    return str;
-  };
-
-  public asNumber() {
-    return (this.highVal << 32) | this.lowVal;
-  }
+export function isTipOrConvenienceIndicator(value: string): boolean {
+  return (getEnumValues(TipOrConvenienceIndicatorType) as string[]).includes(value);
 }
 
 export async function createQRCode(dataForQRcode, center_image, width, cwidth) {
