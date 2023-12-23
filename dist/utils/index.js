@@ -1,9 +1,20 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createQRCode = exports.UInt64 = exports.StringUtil = exports.genDataLength = exports.convertCurrencyCode2Number = exports.isValidCurrencyCode = exports.isValidCountryCode = void 0;
+exports.createQRCode = exports.calcCrcCheckSum = exports.convertCurrencyCode2Number = exports.calcQrItemDataLength = exports.isValidChecksum = exports.isAN = exports.isANS = exports.isTransactionAmount = exports.isNumeric = exports.isServiceCode = exports.isValidCurrencyCode = exports.isValidCountryCode = exports.getEnumValues = exports.getEnumKeys = void 0;
 const country_data_1 = require("country-data");
+const crc_1 = require("crc");
 const QRCode = require("qrcode");
 const canvas_1 = require("canvas");
+const constants_1 = require("../constants");
+const _ = require("lodash");
+function getEnumKeys(e) {
+    return _.difference(_.keys(e), _.map(_.filter(_.values(e), _.isNumber), _.toString));
+}
+exports.getEnumKeys = getEnumKeys;
+function getEnumValues(e) {
+    return _.values(_.pick(e, getEnumKeys(e)));
+}
+exports.getEnumValues = getEnumValues;
 function isValidCountryCode(countryCode) {
     return !!country_data_1.countries[countryCode];
 }
@@ -12,225 +23,46 @@ function isValidCurrencyCode(currencyCode) {
     return !!country_data_1.currencies[currencyCode];
 }
 exports.isValidCurrencyCode = isValidCurrencyCode;
-function convertCurrencyCode2Number(currencyCode) {
-    return isValidCurrencyCode(currencyCode) ? country_data_1.currencies[currencyCode].number : 0;
+function isServiceCode(serviceCode) {
+    return getEnumValues(constants_1.ServiceCode).includes(serviceCode);
 }
-exports.convertCurrencyCode2Number = convertCurrencyCode2Number;
-function genDataLength(data) {
+exports.isServiceCode = isServiceCode;
+function isNumeric(value) {
+    return /^(\d)*$/.test(value);
+}
+exports.isNumeric = isNumeric;
+function isTransactionAmount(value) {
+    return /^(0\.[1-9]|0\.\d[1-9]|[1-9](\d+)?(\.\d{0,2})?)$/.test(value);
+}
+exports.isTransactionAmount = isTransactionAmount;
+function isANS(value) {
+    return /^[\x20-\x7E\xA0-\xA3\xA5\xA7\xA9-\xB3\xB5-\xB7\xB9-\xBB\xBF-\xFF\u20AC\u0160\u0161\u017D\u017E\u0152\u0153\u0178]*$/.test(value);
+}
+exports.isANS = isANS;
+function isAN(value) {
+    return /^[a-zA-Z0-9]+$/.test(value);
+}
+exports.isAN = isAN;
+function isValidChecksum(rawValue) {
+    const calculateString = rawValue.substring(0, rawValue.length - 4);
+    const checkSumValue = rawValue.substring(rawValue.length - 4);
+    return parseInt(calcCrcCheckSum(calculateString), 16) === parseInt(checkSumValue, 16);
+}
+exports.isValidChecksum = isValidChecksum;
+function calcQrItemDataLength(data) {
     return typeof data === 'string' || typeof data === 'number'
         ? (('' + data).length + '').padStart(2, '0')
         : '';
 }
-exports.genDataLength = genDataLength;
-class StringUtil {
-    getLastErrorToken() {
-        return this.lastErrToken;
-    }
-    getCharacterByteArrayFromString(str) {
-        let bytes = [];
-        for (let i = 0; i < str.length; i++) {
-            let charVal = str.charCodeAt(i);
-            if (charVal < 256) {
-                bytes[i] = str.charCodeAt(i);
-            }
-        }
-        return bytes;
-    }
-    getNumberAsHexStr(num) {
-        return '0x' + num.toString(16).toUpperCase();
-    }
-    getNumberAsHexStrWidthBits(num, widthInBits) {
-        let tempStr = num.toString(16).toUpperCase();
-        while (tempStr.length < widthInBits >> 2) {
-            tempStr = '0' + tempStr;
-        }
-        return '0x' + tempStr;
-    }
-    getNumberAsHexStr32(num) {
-        let valueHigh = num >>> 16;
-        let valueLow = num & 0x0000ffff;
-        return '0x' + valueHigh.toString(16).toUpperCase() + valueLow.toString(16).toUpperCase();
-    }
-    getNumberAsHexStr32FixedWidth(num) {
-        let valueHigh = (num >>> 16).toString(16).toUpperCase();
-        while (valueHigh.length < 4) {
-            valueHigh = '0' + valueHigh;
-        }
-        let valueLow = (num & 0x0000ffff).toString(16).toUpperCase();
-        while (valueLow.length < 4) {
-            valueLow = '0' + valueLow;
-        }
-        return '0x' + valueHigh + valueLow;
-    }
-    getCharacterByteArrayFromByteString(str) {
-        let bytes = [];
-        let bytePos = 0;
-        let splitStr = str.split(/\s+/);
-        for (let i = 0; i < splitStr.length; i++) {
-            let byteStr = splitStr[i];
-            if (byteStr.substr(0, 2) === '0x') {
-                byteStr = byteStr.substr(2, byteStr.length - 2);
-            }
-            if (byteStr === ' ' || byteStr === '')
-                continue;
-            let b = parseInt(byteStr, 16);
-            if (b === NaN || b === undefined) {
-                this.lastErrToken = byteStr;
-                return undefined;
-            }
-            else {
-                if (b < 256) {
-                    bytes[bytePos] = b;
-                    bytePos++;
-                }
-                else {
-                    this.lastErrToken = byteStr;
-                    return undefined;
-                }
-            }
-        }
-        return bytes;
-    }
-    static isBinaryString(s) {
-        for (let i = 0; i < s.length; i++) {
-            if (!(s[i] == '0' || s[i] == '1'))
-                return false;
-        }
-        return true;
-    }
-    getCharacterByteArrayFromBinaryString(str) {
-        let bytes = [];
-        let parts = str.split(/\s+/);
-        for (let strIdx = 0; strIdx < parts.length; strIdx++) {
-            let strPart = parts[strIdx];
-            while (strPart.length < 8) {
-                strPart = '0' + strPart;
-            }
-            if (!StringUtil.isBinaryString(strPart)) {
-                this.lastErrToken = strPart;
-                return undefined;
-            }
-            let num = 0;
-            for (let i = 0; i < 8; i++) {
-                if (strPart[i] == '1') {
-                    num = num + (1 << (7 - i));
-                }
-            }
-            bytes.push(num);
-        }
-        return bytes;
-    }
+exports.calcQrItemDataLength = calcQrItemDataLength;
+function convertCurrencyCode2Number(currencyCode) {
+    return isValidCurrencyCode(currencyCode) ? country_data_1.currencies[currencyCode].number : 0;
 }
-exports.StringUtil = StringUtil;
-class UInt64 {
-    constructor(numOrUint64, lowVal) {
-        this.toHexString = function () {
-            let str = '';
-            let stringUtil = new StringUtil();
-            str += stringUtil.getNumberAsHexStr32FixedWidth(this.highVal);
-            str += stringUtil.getNumberAsHexStr32FixedWidth(this.lowVal).substring(2, 10);
-            return str;
-        };
-        if (typeof numOrUint64 === 'number') {
-            this.highVal = numOrUint64 & 0xffffffff;
-            this.lowVal = lowVal & 0xffffffff;
-        }
-        else {
-            this.highVal = numOrUint64.highVal;
-            this.lowVal = numOrUint64.lowVal;
-        }
-    }
-    clone() {
-        return new UInt64(this);
-    }
-    static fromString(strHigh, strLow) {
-        let numHigh = 0, numLow = 0;
-        if (strLow == undefined) {
-            if (strHigh.substr(0, 2) === '0x') {
-                strHigh = strHigh.substr(2, strHigh.length - 2);
-            }
-            while (strHigh.length < 16) {
-                strHigh = '0' + strHigh;
-            }
-            numHigh = parseInt(strHigh.substr(0, 8), 16);
-            numLow = parseInt(strHigh.substr(8, 15), 16);
-        }
-        else {
-            if (strHigh.substr(0, 2) === '0x') {
-                strHigh = strHigh.substr(2, strHigh.length - 2);
-            }
-            while (strHigh.length < 8) {
-                strHigh = '0' + strHigh;
-            }
-            numHigh = parseInt(strHigh, 16);
-            if (strLow.substr(0, 2) === '0x') {
-                strLow = strLow.substr(2, strLow.length - 2);
-            }
-            while (strLow.length < 8) {
-                strLow = '0' + strLow;
-            }
-            numLow = parseInt(strLow, 16);
-        }
-        return new UInt64(numHigh, numLow);
-    }
-    and(otherUInt64OrNumber) {
-        if (typeof otherUInt64OrNumber === 'number') {
-            this.highVal = 0;
-            this.lowVal = this.lowVal & otherUInt64OrNumber;
-        }
-        else {
-            this.highVal = this.highVal & otherUInt64OrNumber.highVal;
-            this.lowVal = this.lowVal & otherUInt64OrNumber.lowVal;
-        }
-        return this;
-    }
-    shl(dist) {
-        for (let i = 0; i < dist; i++) {
-            this.highVal = this.highVal << 1;
-            if ((this.lowVal & 0x80000000) != 0) {
-                this.highVal |= 0x01;
-            }
-            this.lowVal = this.lowVal << 1;
-        }
-        return this;
-    }
-    shr(dist) {
-        for (let i = 0; i < dist; i++) {
-            this.lowVal = this.lowVal >>> 1;
-            if ((this.highVal & 0x00000001) != 0) {
-                this.lowVal |= 0x80000000;
-            }
-            this.highVal = this.highVal >>> 1;
-        }
-        return this;
-    }
-    isZero() {
-        return this.highVal == 0 && this.lowVal == 0;
-    }
-    xor(otherUInt64) {
-        this.highVal = this.highVal ^ otherUInt64.highVal;
-        this.lowVal = this.lowVal ^ otherUInt64.lowVal;
-        return this;
-    }
-    reflect() {
-        let newHighVal = 0, newLowVal = 0;
-        for (let i = 0; i < 32; i++) {
-            if ((this.highVal & (1 << (31 - i))) != 0) {
-                newLowVal |= 1 << i;
-            }
-            if ((this.lowVal & (1 << i)) != 0) {
-                newHighVal |= 1 << (31 - i);
-            }
-        }
-        this.lowVal = newLowVal;
-        this.highVal = newHighVal;
-        return this;
-    }
-    asNumber() {
-        return (this.highVal << 32) | this.lowVal;
-    }
+exports.convertCurrencyCode2Number = convertCurrencyCode2Number;
+function calcCrcCheckSum(value) {
+    return (0, crc_1.crc16ccitt)(value).toString(16).toUpperCase();
 }
-exports.UInt64 = UInt64;
+exports.calcCrcCheckSum = calcCrcCheckSum;
 async function createQRCode(dataForQRcode, center_image, width, cwidth) {
     if (!center_image) {
         center_image =
@@ -252,4 +84,4 @@ async function createQRCode(dataForQRcode, center_image, width, cwidth) {
     return canvas.toDataURL('image/png');
 }
 exports.createQRCode = createQRCode;
-//# sourceMappingURL=utils.js.map
+//# sourceMappingURL=index.js.map

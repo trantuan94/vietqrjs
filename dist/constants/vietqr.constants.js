@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DEFAULT_COUNTRY_CODE = exports.DEFAULT_CURRENCY = exports.TipOrConvenienceIndicatorType = exports.MerchantCategoryCode = exports.GUID = exports.ServiceCode = exports.BeneficaryOrganizationFieldID = exports.MerchantAccInfoFieldID = exports.VietQrInitiateMethod = exports.VietQrVersion = exports.LanguageTemplateFieldID = exports.AdditionalConsumerDataReq = exports.AdditionalDataFieldID = exports.VietQrFieldID = void 0;
+exports.LanguageTemplateFieldName = exports.AdditionalDataFieldName = exports.BeneficaryOrganizationFieldName = exports.MerchantAccInfoFieldName = exports.VietQRFieldName = exports.DEFAULT_COUNTRY_CODE = exports.DEFAULT_CURRENCY = exports.TipOrConvenienceIndicatorType = exports.MerchantCategoryCode = exports.GUID = exports.ServiceCode = exports.AdditionalConsumerDataReq = exports.MerchantAccInfoFieldID = exports.VietQrInitiateMethod = exports.VietQrVersion = exports.BeneficaryOrganizationFieldID = exports.LanguageTemplateFieldID = exports.AdditionalDataFieldID = exports.VietQrFieldID = void 0;
 const country_data_1 = require("country-data");
 var VietQrFieldID;
 (function (VietQrFieldID) {
@@ -33,18 +33,17 @@ var AdditionalDataFieldID;
     AdditionalDataFieldID["PURPOSE_OF_TRANSACTION"] = "08";
     AdditionalDataFieldID["ADDITIONAL_CONSUMER_DATA_REQUEST"] = "09";
 })(AdditionalDataFieldID = exports.AdditionalDataFieldID || (exports.AdditionalDataFieldID = {}));
-var AdditionalConsumerDataReq;
-(function (AdditionalConsumerDataReq) {
-    AdditionalConsumerDataReq["CUSTOMER_ADDRESS"] = "A";
-    AdditionalConsumerDataReq["CUSTOMER_MOBILE"] = "M";
-    AdditionalConsumerDataReq["CUSTOMER_EMAIL"] = "E";
-})(AdditionalConsumerDataReq = exports.AdditionalConsumerDataReq || (exports.AdditionalConsumerDataReq = {}));
 var LanguageTemplateFieldID;
 (function (LanguageTemplateFieldID) {
     LanguageTemplateFieldID["LANGUAGE_PREFERENCE"] = "00";
     LanguageTemplateFieldID["ALTERNATE_MERCHANT_NAME"] = "01";
     LanguageTemplateFieldID["ALTERNATE_MERCHANT_CITY"] = "02";
 })(LanguageTemplateFieldID = exports.LanguageTemplateFieldID || (exports.LanguageTemplateFieldID = {}));
+var BeneficaryOrganizationFieldID;
+(function (BeneficaryOrganizationFieldID) {
+    BeneficaryOrganizationFieldID["ACQUIER_ID"] = "00";
+    BeneficaryOrganizationFieldID["MERCHANT_ID"] = "01";
+})(BeneficaryOrganizationFieldID = exports.BeneficaryOrganizationFieldID || (exports.BeneficaryOrganizationFieldID = {}));
 var VietQrVersion;
 (function (VietQrVersion) {
     VietQrVersion["V1"] = "01";
@@ -60,11 +59,12 @@ var MerchantAccInfoFieldID;
     MerchantAccInfoFieldID["BENEFICIARY_ORGANIZATION"] = "01";
     MerchantAccInfoFieldID["SERVICE_CODE"] = "02";
 })(MerchantAccInfoFieldID = exports.MerchantAccInfoFieldID || (exports.MerchantAccInfoFieldID = {}));
-var BeneficaryOrganizationFieldID;
-(function (BeneficaryOrganizationFieldID) {
-    BeneficaryOrganizationFieldID["ACQUIER_ID"] = "00";
-    BeneficaryOrganizationFieldID["MERCHANT_ID"] = "01";
-})(BeneficaryOrganizationFieldID = exports.BeneficaryOrganizationFieldID || (exports.BeneficaryOrganizationFieldID = {}));
+var AdditionalConsumerDataReq;
+(function (AdditionalConsumerDataReq) {
+    AdditionalConsumerDataReq["CUSTOMER_ADDRESS"] = "A";
+    AdditionalConsumerDataReq["CUSTOMER_MOBILE"] = "M";
+    AdditionalConsumerDataReq["CUSTOMER_EMAIL"] = "E";
+})(AdditionalConsumerDataReq = exports.AdditionalConsumerDataReq || (exports.AdditionalConsumerDataReq = {}));
 var ServiceCode;
 (function (ServiceCode) {
     ServiceCode["BY_PRODUCT_PAYMENT_SERVICE"] = "QRPUSH";
@@ -122,4 +122,52 @@ var TipOrConvenienceIndicatorType;
 })(TipOrConvenienceIndicatorType = exports.TipOrConvenienceIndicatorType || (exports.TipOrConvenienceIndicatorType = {}));
 exports.DEFAULT_CURRENCY = country_data_1.currencies.VND.number;
 exports.DEFAULT_COUNTRY_CODE = country_data_1.countries.VN.alpha2;
+var VietQRFieldName;
+(function (VietQRFieldName) {
+    VietQRFieldName["VERSION"] = "version";
+    VietQRFieldName["INITIAL_METHOD"] = "initialMethod";
+    VietQRFieldName["MERCHANT_ACCOUNT_INFO"] = "merchantAccInfo";
+    VietQRFieldName["MERCHANT_CATEGORY_CODE"] = "mcc";
+    VietQRFieldName["TRANSACTION_CURRENCY"] = "currency";
+    VietQRFieldName["TRANSACTION_AMOUNT"] = "amount";
+    VietQRFieldName["TIP_OR_CONVENIENCE_INDICATOR"] = "tipConvenienceIndicator";
+    VietQRFieldName["CONVENIENCE_FEE_FIXED"] = "convenienceFeeFixed";
+    VietQRFieldName["CONVENIENCE_FEE_PERCENTAGE"] = "convenienceFeePercentage";
+    VietQRFieldName["COUNTRY_CODE"] = "countryCode";
+    VietQRFieldName["MERCHANT_NAME"] = "merchantName";
+    VietQRFieldName["MERCHANT_CITY"] = "merchantCity";
+    VietQRFieldName["POSTAL_CODE"] = "postalCode";
+    VietQRFieldName["ADDITIONAL_DATA"] = "additionalData";
+    VietQRFieldName["LANGUAGE_TEMPLATE"] = "languageTemplate";
+    VietQRFieldName["CRC_CODE"] = "crcCode";
+})(VietQRFieldName = exports.VietQRFieldName || (exports.VietQRFieldName = {}));
+var MerchantAccInfoFieldName;
+(function (MerchantAccInfoFieldName) {
+    MerchantAccInfoFieldName["GUID"] = "guid";
+    MerchantAccInfoFieldName["BENEFICIARY_ORGANIZATION"] = "benificiaryOrg";
+    MerchantAccInfoFieldName["SERVICE_CODE"] = "serviceCode";
+})(MerchantAccInfoFieldName = exports.MerchantAccInfoFieldName || (exports.MerchantAccInfoFieldName = {}));
+var BeneficaryOrganizationFieldName;
+(function (BeneficaryOrganizationFieldName) {
+    BeneficaryOrganizationFieldName["ACQUIER_ID"] = "acquirerId";
+    BeneficaryOrganizationFieldName["MERCHANT_ID"] = "merchantId";
+})(BeneficaryOrganizationFieldName = exports.BeneficaryOrganizationFieldName || (exports.BeneficaryOrganizationFieldName = {}));
+var AdditionalDataFieldName;
+(function (AdditionalDataFieldName) {
+    AdditionalDataFieldName["BILL_NUMBER"] = "billNumber";
+    AdditionalDataFieldName["MOBILE_NUMBER"] = "mobileNumber";
+    AdditionalDataFieldName["STORE_LABEL"] = "storeLabel";
+    AdditionalDataFieldName["LOYALTY_NUMBER"] = "loyaltyNumber";
+    AdditionalDataFieldName["REFERENCE_LABEL"] = "referenceLabel";
+    AdditionalDataFieldName["CUSTOMER_LABEL"] = "customerLabel";
+    AdditionalDataFieldName["TERMINAL_LABEL"] = "terminalLabel";
+    AdditionalDataFieldName["PURPOSE_OF_TRANSACTION"] = "purposeOfTxn";
+    AdditionalDataFieldName["ADDITIONAL_CONSUMER_DATA_REQUEST"] = "additionalConsumerDataReq";
+})(AdditionalDataFieldName = exports.AdditionalDataFieldName || (exports.AdditionalDataFieldName = {}));
+var LanguageTemplateFieldName;
+(function (LanguageTemplateFieldName) {
+    LanguageTemplateFieldName["LANGUAGE_PREFERENCE"] = "preference";
+    LanguageTemplateFieldName["ALTERNATE_MERCHANT_NAME"] = "merchantName";
+    LanguageTemplateFieldName["ALTERNATE_MERCHANT_CITY"] = "merchantCity";
+})(LanguageTemplateFieldName = exports.LanguageTemplateFieldName || (exports.LanguageTemplateFieldName = {}));
 //# sourceMappingURL=vietqr.constants.js.map

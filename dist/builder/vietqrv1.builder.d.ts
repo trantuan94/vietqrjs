@@ -1,20 +1,26 @@
-import { IBasicVietQrData, IMerchantAccountInfo } from '../constants/index';
+import { IBasicVietQrData, IMerchantAccountInfo, IAdditionalData, ILanguageTemplate } from '../constants/index';
 export declare class VietQRV1Builder {
     private data;
     private qrCodeString;
     constructor();
     private initData;
     setMerchantAccountInfo(info: IMerchantAccountInfo): this;
+    setMerchantName(merchantName: string): this;
+    setMerchantCity(merchantCity: string): this;
+    setPostalCode(postalCode: string): this;
     setTxnAmount(amount: number): this;
-    setTxnDescription(description: string): void;
+    setTxnDescription(description: string): this;
     setTxnCurrency(currencyCode?: any): this;
     setTxnCountry(countryCode?: any): this;
-    refresh(): void;
+    setAdditionalData(additionalData: IAdditionalData): this;
+    setLanguageTemplate(languageTemplate: ILanguageTemplate): this;
+    setmerchantCategoryCode(mcc: string): this;
+    refresh(): this;
     quickBuild(input: IBasicVietQrData): this;
     build(): this;
     getQrCodeString(): string;
     generateQR(): Promise<string>;
-    private genBasicDataStructure;
+    private genBasicQrStringItem;
     private genVersion;
     private genInitMethod;
     private genMerchantAccInfo;
@@ -47,5 +53,4 @@ export declare class VietQRV1Builder {
     private genLanguagePreferenceInfo;
     private genLanguageMerchantNameInfo;
     private genLanguageMerchantCityInfo;
-    private calcCRCCode;
 }
