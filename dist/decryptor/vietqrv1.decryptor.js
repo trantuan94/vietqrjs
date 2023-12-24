@@ -70,6 +70,9 @@ class VietQrV1Decryptor {
         };
     }
     isValidChecksum(qrString) {
+        if (!/6304[0-9A-Fa-f]{4}$/gm.test(qrString)) {
+            return false;
+        }
         return (0, utils_1.isValidChecksum)(qrString);
     }
     decrypt(qrString) {
