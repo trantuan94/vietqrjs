@@ -1,19 +1,35 @@
-## Overview 
-  This vietqrjs library support some features to render VietQR - Napas247
-   - Create QR code from data: account number, account name, bank ID, bank name, transaction amount, description ...
-   - Decrypt an QR string (string read from QR code image) to get information to payment.
-  VietQR supports 4 service types:
-    - Cash withdrawl service (QRCASH)
-    - Products payment service (QRPUSH)
-    - transfer by account number (QRIBFTTA)
-    - transfer by card number (QRIBFTTC)
-  This library be implemented follow document from NAPAS on https://vietqr.net/.
-  Note: In document from Napas, some properties in Additional Data field is required with each service code type. But field additional Data template in this library only implement with all properties is optional and not validate with service code type.
+  <h1 align="center">VietQR JS</h1>
+<p align="center">
+  <a href="http://vietqr.net/" target="blank">
+    <img src="https://minisiteb.qltns.mediacdn.vn/minisite/aa12f4ae83b041e3a4a6e97a5cd8875f-chuyentiennhanh247/assets/image/vietqr.png" width="150" alt="VietQR Logo" />
+  </a> &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://napas.com.vn/dich-vu-chuyen-tien-nhanh-napas-247-182220815095336979.htm" target="blank">
+    <img src="https://minisiteb.qltns.mediacdn.vn/minisite/19f78f16d6574c6e9cbe500e822c0aac-chuyentiennhanh/assets/image/ctn-napas-logo.png" width="150" alt="Napas 247 logo">
+  </a>
+</p>
+
+# Overview 
+### This library be implemented follow the VietQR specified document from NAPAS on <a href="https://vietqr.net/" target="blank">vietqr.net</a>
+<b>Vietqrjs</b> library supports some features:
+   - Create QR string|code from data: account number, account name, bank ID, bank name, transaction amount, description ...
+   - Decrypt an QR string (string read from QR code image) to get information for payment.(from v1.1.0)
+
+<b>Vietqrjs</b> supports 4 service types:
+  - Cash withdraw service (<b>QRCASH</b>)
+  - Products payment service (<b>QRPUSH</b>)
+  - transfer by account number (<b>QRIBFTTA</b>)
+  - transfer by card number (<b>QRIBFTTC</b>)
+
+  
+<h3><b>Note:</b></h3> In document from Napas, each service code type required some properties in Additional Data field. But in this library, all properties in Additional Data field is optional and not validate it with service code type. You can write validate in your source-code if you need.
+
 ## Change Logs:
-- v1.1.0
-  + Add VietQrV1Decryptor to support decrypt QR string to get Merchant/Consumer information.
-  + Update Unit tests for VietQRV1Builder and VietQrV1Decryptor functions
-- v1.0.2
+### <b>v1.1.1</b>
+  - Fixed some bugs related to function check valid CRC code of QR string in Decryptor class
+### <b>v1.1.0</b>
+  - Add VietQrV1Decryptor to support decrypt QR string to get Merchant/Consumer information.
+  - Update Unit tests for VietQRV1Builder and VietQrV1Decryptor functions
+### <b>v1.0.2</b>
   - Add new service codes: QRPUSH and QRCASH
 
 ## Installation
@@ -22,6 +38,7 @@ npm i --save vietqrjs
 ```
 
 # Usage
+
 ## VietQRV1Builder
   Generate QR string from account information
 ### Quick generate QR string
@@ -30,10 +47,11 @@ import {VietQRV1Builder, BankBIN, ServiceCode} from 'vietqrjs';
 const builder = new VietQRV1Builder();
 const qrDataString = builder.quickBuild({
     acquierId: BankBIN.VIETINBANK, // ID DVCNTT
-    merchantId: '', // Tài khoản/Số thẻ thụ hưởng
+    merchantId: '', // Account number
     serviceCode: ServiceCode.BY_ACCOUNT_NUMBER,
   }).getQrCodeString();
 ```
+
 ### Build an QR string to render static QR code with account number
 
 ```ts
@@ -115,7 +133,8 @@ const qrDataStr = builder.setMerchantAccountInfo({
   .getQrCodeString();
 ```
 
-## VietQrDecryptor
+## VietQrV1Decryptor (supported from v1.1.0)
+  Decrypt QR string to get information for payment.
 ### Check CRC checksum of QR string
 ```ts
 import { VietQrV1Decryptor } from 'vietqrjs';
@@ -124,7 +143,7 @@ const isValid = decryptor.isValidChecksum('00020101021238500010A0000007270122000
 console.log(isValid) // false
 ```
 
-### Decrypt QR string to get merchant/consumer information
+### Decrypt QR string to get information for payment
 ```ts
 import { VietQrV1Decryptor } from 'vietqrjs';
 const decryptor = new VietQrV1Decryptor();

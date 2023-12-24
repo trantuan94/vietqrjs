@@ -126,6 +126,9 @@ export class VietQrV1Decryptor {
   }
 
   isValidChecksum(qrString: string): boolean {
+    if (!/6304[0-9A-Fa-f]{4}$/gm.test(qrString)) {
+      return false;
+    }
     return isValidChecksum(qrString);
   }
 
