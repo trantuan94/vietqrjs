@@ -1,21 +1,22 @@
-import { VietQRFieldName, VietQrFieldID } from '../constants';
-import { isANS, isNumeric } from '../utils';
-import { VietQrV1Decryptor } from './vietqrv1.decryptor';
+import {VietQRFieldName, VietQrFieldID} from '../constants';
+import {isANS, isNumeric} from '../utils';
+import {VietQrV1Decryptor} from './vietqrv1.decryptor';
 
 describe('VietQrV1Decryptor', () => {
-  let decryptor = new VietQrV1Decryptor();
+  const decryptor = new VietQrV1Decryptor();
   describe('decrypt', () => {
     it('decrypt qrpush payment product', () => {
-      const qrString = '00020101021238580010A00000072701300006970403011621129950446040250206QRPUSH52045812530370454061800005802VN5910PHUONG CAC6005HANOI62110307NPS686963047C1B';
+      const qrString =
+        '00020101021238580010A00000072701300006970403011621129950446040250206QRPUSH52045812530370454061800005802VN5910PHUONG CAC6005HANOI62110307NPS686963047C1B';
       const qrData = decryptor.decrypt(qrString);
 
-      expect(qrData).toEqual({
+      expect(qrData).toStrictEqual({
         version: '01',
         initMethod: '12',
         merchantAccInfo: {
           guid: 'A000000727',
-          beneficiaryOrg: { acquierId: '970403', merchantId: '2112995044604025' },
-          serviceCode: 'QRPUSH'
+          beneficiaryOrg: {acquierId: '970403', merchantId: '2112995044604025'},
+          serviceCode: 'QRPUSH',
         },
         merchantCategoryCode: '5812',
         txnCurrency: 704,
@@ -26,21 +27,22 @@ describe('VietQrV1Decryptor', () => {
         additionalData: {
           storeLabel: 'NPS6869',
         },
-        crcCode: '7C1B'
+        crcCode: '7C1B',
       });
     });
 
     it('decrypt qrpush payment product with RFU EMVCo field ', () => {
-      const qrString = '00020101021238580010A00000072701300006970403011621129950446040250206QRPUSH52045812530370454061800005802VN5910PHUONG CAC6005HANOI62110307NPS68697003abc63046D58';
+      const qrString =
+        '00020101021238580010A00000072701300006970403011621129950446040250206QRPUSH52045812530370454061800005802VN5910PHUONG CAC6005HANOI62110307NPS68697003abc63046D58';
       const qrData = decryptor.decrypt(qrString);
 
-      expect(qrData).toEqual({
+      expect(qrData).toStrictEqual({
         version: '01',
         initMethod: '12',
         merchantAccInfo: {
           guid: 'A000000727',
-          beneficiaryOrg: { acquierId: '970403', merchantId: '2112995044604025' },
-          serviceCode: 'QRPUSH'
+          beneficiaryOrg: {acquierId: '970403', merchantId: '2112995044604025'},
+          serviceCode: 'QRPUSH',
         },
         merchantCategoryCode: '5812',
         txnCurrency: 704,
@@ -51,19 +53,27 @@ describe('VietQrV1Decryptor', () => {
         additionalData: {
           storeLabel: 'NPS6869',
         },
-        crcCode: '6D58'
+        crcCode: '6D58',
       });
     });
     it('decrypt cash withdrawl service', () => {
-      const qrData = decryptor.decrypt('00020101021238500010A000000727012200069704030108123456780206QRCASH5204601153037045802VN5915NGUYEN HUU HUAN6005HANOI6105100006237052120190109155714228384707080000111164260002en0107shop vn0205Hanoi630476DA');
+      const qrData = decryptor.decrypt(
+        '00020101021238500010A000000727012200069704030108123456780206QRCASH5204601153037045802VN5915NGUYEN HUU HUAN6005HANOI6105100006237052120190109155714228384707080000111164260002en0107shop vn0205Hanoi630476DA',
+        {
+          lean: false,
+        },
+      );
 
-      expect(qrData).toEqual({
+      expect(qrData).toStrictEqual({
         version: '01',
         initMethod: '12',
         merchantAccInfo: {
           guid: 'A000000727',
-          beneficiaryOrg: { acquierId: '970403', merchantId: '12345678' },
-          serviceCode: 'QRCASH'
+          beneficiaryOrg: {
+            acquierId: '970403',
+            merchantId: '12345678',
+          },
+          serviceCode: 'QRCASH',
         },
         merchantCategoryCode: '6011',
         txnCurrency: 704,
@@ -84,65 +94,119 @@ describe('VietQrV1Decryptor', () => {
           customerLabel: undefined,
           terminalLabel: '00001111',
           purposeOfTxn: undefined,
-          additionalConsumerDataReq: undefined
+          additionalConsumerDataReq: undefined,
         },
         languageTemplate: {
           preference: 'en',
           merchantName: 'shop vn',
           merchantCity: 'Hanoi',
         },
-        crcCode: '76DA'
+        crcCode: '76DA',
+      });
+
+      const qrData2 = decryptor.decrypt(
+        '00020101021238500010A000000727012200069704030108123456780206QRCASH5204601153037045802VN5915NGUYEN HUU HUAN6005HANOI6105100006237052120190109155714228384707080000111164260002en0107shop vn0205Hanoi630476DA',
+        {
+          lean: true,
+        },
+      );
+      expect(qrData2).toStrictEqual({
+        version: '01',
+        initMethod: '12',
+        merchantAccInfo: {
+          guid: 'A000000727',
+          beneficiaryOrg: {
+            acquierId: '970403',
+            merchantId: '12345678',
+          },
+          serviceCode: 'QRCASH',
+        },
+        merchantCategoryCode: '6011',
+        txnCurrency: 704,
+        countryCode: 'VN',
+        merchantName: 'NGUYEN HUU HUAN',
+        merchantCity: 'HANOI',
+        postalCode: '10000',
+        additionalData: {
+          referenceLabel: '201901091557142283847',
+          terminalLabel: '00001111',
+        },
+        languageTemplate: {
+          preference: 'en',
+          merchantName: 'shop vn',
+          merchantCity: 'Hanoi',
+        },
+        crcCode: '76DA',
       });
     });
+
     it('should throw error by invalid checksum', () => {
       try {
-        decryptor.decrypt('00020101021238500010A000000727012200069704030108123456780206QRCASH5204601153037045802VN5915NGUYEN HUU HUAN6005HANOI6105100006237052120190109155714228384707080000111164260002en0107shop vn0205Hanoi630476CD');
+        decryptor.decrypt(
+          '00020101021238500010A000000727012200069704030108123456780206QRCASH5204601153037045802VN5915NGUYEN HUU HUAN6005HANOI6105100006237052120190109155714228384707080000111164260002en0107shop vn0205Hanoi630476CD',
+        );
       } catch (err) {
         expect(err.message).toEqual('QR string has invalid Cyclic Redundency checksum.');
       }
     });
     it('should throw error by validate required fields', () => {
       try {
-        decryptor.decrypt('01021238500010A000000727012200069704030108123456780206QRCASH5204601153037045802VN5915NGUYEN HUU HUAN6005HANOI6237052120190109155714228384707080000111163044C99');
+        decryptor.decrypt(
+          '01021238500010A000000727012200069704030108123456780206QRCASH5204601153037045802VN5915NGUYEN HUU HUAN6005HANOI6237052120190109155714228384707080000111163044C99',
+        );
       } catch (err) {
         expect(err.message).toEqual('Field version in QR string must be start with 00.');
       }
       try {
-        decryptor.decrypt('00020138500010A000000727012200069704030108123456780206QRCASH5204601153037045802VN5915NGUYEN HUU HUAN6005HANOI6237052120190109155714228384707080000111163046EF0');
+        decryptor.decrypt(
+          '00020138500010A000000727012200069704030108123456780206QRCASH5204601153037045802VN5915NGUYEN HUU HUAN6005HANOI6237052120190109155714228384707080000111163046EF0',
+        );
       } catch (err) {
-        expect(err.message).toEqual('Field initial method in QR is required.')
+        expect(err.message).toEqual('Field initial method in QR is required.');
       }
       try {
-        decryptor.decrypt('00020101021253037045802VN5915NGUYEN HUU HUAN6005HANOI62370521201901091557142283847070800001111630447BE');
+        decryptor.decrypt(
+          '00020101021253037045802VN5915NGUYEN HUU HUAN6005HANOI62370521201901091557142283847070800001111630447BE',
+        );
       } catch (err) {
         expect(err.message).toEqual('Field merchant account information in QR is required.');
       }
       try {
-        decryptor.decrypt('00020101021238500010A000000727012200069704030108123456780206QRCASH520460115802VN5915NGUYEN HUU HUAN6005HANOI623705212019010915571422838470708000011116304FDB8');
+        decryptor.decrypt(
+          '00020101021238500010A000000727012200069704030108123456780206QRCASH520460115802VN5915NGUYEN HUU HUAN6005HANOI623705212019010915571422838470708000011116304FDB8',
+        );
       } catch (err) {
         expect(err.message).toEqual('Field currency in QR is required.');
       }
       try {
-        decryptor.decrypt('00020101021238500010A000000727012200069704030108123456780206QRCASH5204601153037045915NGUYEN HUU HUAN6005HANOI6237052120190109155714228384707080000111163041028');
+        decryptor.decrypt(
+          '00020101021238500010A000000727012200069704030108123456780206QRCASH5204601153037045915NGUYEN HUU HUAN6005HANOI6237052120190109155714228384707080000111163041028',
+        );
       } catch (err) {
         expect(err.message).toEqual('Field country code in QR is required.');
       }
     });
     it('should throw error by tip or convenience', () => {
       try {
-        decryptor.decrypt('00020101021238580010A00000072701300006970403011621129950446040250206QRPUSH52045812530370454061800005502045802VN5910PHUONG CAC6005HANOI62110307NPS68696304A6A4');
+        decryptor.decrypt(
+          '00020101021238580010A00000072701300006970403011621129950446040250206QRPUSH52045812530370454061800005502045802VN5910PHUONG CAC6005HANOI62110307NPS68696304A6A4',
+        );
       } catch (err) {
         expect(err.message).toEqual('Value of tip or convenience indicator is invalid');
       }
 
       try {
-        decryptor.decrypt('00020101021238580010A00000072701300006970403011621129950446040250206QRPUSH520458125303704540618000055020257035.05802VN5910PHUONG CAC6005HANOI62110307NPS686963047EA0');
+        decryptor.decrypt(
+          '00020101021238580010A00000072701300006970403011621129950446040250206QRPUSH520458125303704540618000055020257035.05802VN5910PHUONG CAC6005HANOI62110307NPS686963047EA0',
+        );
       } catch (err) {
         expect(err.message).toEqual('value of convenience fee fixed in QR is required.');
       }
 
       try {
-        decryptor.decrypt('00020101021238580010A00000072701300006970403011621129950446040250206QRPUSH52045812530370454061800005502035605100005802VN5910PHUONG CAC6005HANOI62110307NPS6869630497BE');
+        decryptor.decrypt(
+          '00020101021238580010A00000072701300006970403011621129950446040250206QRPUSH52045812530370454061800005502035605100005802VN5910PHUONG CAC6005HANOI62110307NPS6869630497BE',
+        );
       } catch (err) {
         expect(err.message).toEqual('value of convenience fee percentage in QR is required.');
       }
@@ -172,7 +236,11 @@ describe('VietQrV1Decryptor', () => {
   });
   describe('decryptMerchantAccInfo', () => {
     it('should return value', () => {
-      expect(decryptor.decryptMerchantAccInfo('0010A00000072701300006970403011697040311012345670208QRIBFTTC0303abc0')).toEqual({
+      expect(
+        decryptor.decryptMerchantAccInfo(
+          '0010A00000072701300006970403011697040311012345670208QRIBFTTC0303abc0',
+        ),
+      ).toEqual({
         guid: 'A000000727',
         beneficiaryOrg: {
           acquierId: '970403',
@@ -183,16 +251,18 @@ describe('VietQrV1Decryptor', () => {
     });
     it('should throw error by do not have guid field', () => {
       try {
-        decryptor.decryptMerchantAccInfo('01300006970403011697040311012345670208QRIBFTTC')
+        decryptor.decryptMerchantAccInfo('01300006970403011697040311012345670208QRIBFTTC');
       } catch (err) {
         expect(err.message).toEqual('guid in Merchant Account Information is required.');
       }
     });
     it('should throw error by do not have beneficiary organization field', () => {
       try {
-        decryptor.decryptMerchantAccInfo('0010A0000007270208QRIBFTTC')
+        decryptor.decryptMerchantAccInfo('0010A0000007270208QRIBFTTC');
       } catch (err) {
-        expect(err.message).toEqual('beneficiary Organization in Merchant Account Information is required.');
+        expect(err.message).toEqual(
+          'beneficiary Organization in Merchant Account Information is required.',
+        );
       }
     });
   });
@@ -224,10 +294,14 @@ describe('VietQrV1Decryptor', () => {
       }
     });
   });
-  
+
   describe('decryptAdditionalData', () => {
     it('should return value', () => {
-      expect(decryptor.decryptAdditionalData('0106B12345021003900000010307NPS68690402100506123456060312307060011220809pay a box0901A1003abc1')).toEqual({
+      expect(
+        decryptor.decryptAdditionalData(
+          '0106B12345021003900000010307NPS68690402100506123456060312307060011220809pay a box0901A1003abc1',
+        ),
+      ).toEqual({
         billNumber: 'B12345',
         mobileNumber: '0390000001',
         storeLabel: 'NPS6869',
@@ -244,32 +318,24 @@ describe('VietQrV1Decryptor', () => {
   describe('validateQrItem', () => {
     it('should be throw by invalid length of value', () => {
       try {
-        decryptor.validateQrItem(
-          'hanoi',
-          10,
-          'merchant city',
-          {
-            required: false,
-            maxLength: 15,
-            customValidate: isANS,
-          }
-        );
+        decryptor.validateQrItem('hanoi', 10, 'merchant city', {
+          required: false,
+          maxLength: 15,
+          customValidate: isANS,
+        });
       } catch (err) {
-        expect(err.message).toEqual('Length of merchant city is not equal to defined length in QR string.');
+        expect(err.message).toEqual(
+          'Length of merchant city is not equal to defined length in QR string.',
+        );
       }
     });
     it('should be throw error by value is empty and field is required', () => {
       try {
-        decryptor.validateQrItem(
-          '',
-          10,
-          'merchant ID',
-          {
-            required: true,
-            maxLength: 19,
-            customValidate: isANS,
-          }
-        );
+        decryptor.validateQrItem('', 10, 'merchant ID', {
+          required: true,
+          maxLength: 19,
+          customValidate: isANS,
+        });
       } catch (err) {
         expect(err.message).toEqual('Field merchant ID in QR string is required.');
       }
@@ -277,48 +343,35 @@ describe('VietQrV1Decryptor', () => {
 
     it('should be throw error by value length greater than max length', () => {
       try {
-        decryptor.validateQrItem(
-          '123435564453323423423',
-          21,
-          'merchant ID',
-          {
-            required: true,
-            maxLength: 19,
-            customValidate: isANS,
-          }
-        );
+        decryptor.validateQrItem('123435564453323423423', 21, 'merchant ID', {
+          required: true,
+          maxLength: 19,
+          customValidate: isANS,
+        });
       } catch (err) {
-        expect(err.message).toEqual('Length of merchant ID in QR string must be less than or equal to 19.');
+        expect(err.message).toEqual(
+          'Length of merchant ID in QR string must be less than or equal to 19.',
+        );
       }
     });
     it('should be throw error by value length not equals to fixed length', () => {
       try {
-        decryptor.validateQrItem(
-          '70',
-          2,
-          'currency code',
-          {
-            required: true,
-            fixedLength: 3,
-            customValidate: isNumeric,
-          }
-        );
+        decryptor.validateQrItem('70', 2, 'currency code', {
+          required: true,
+          fixedLength: 3,
+          customValidate: isNumeric,
+        });
       } catch (err) {
         expect(err.message).toEqual('Length of currency code in QR string must be equal to 3.');
       }
     });
     it('should be throw error by value not passed custom validator', () => {
       try {
-        decryptor.validateQrItem(
-          'VN0',
-          3,
-          'currency code',
-          {
-            required: true,
-            fixedLength: 3,
-            customValidate: isNumeric,
-          }
-        );
+        decryptor.validateQrItem('VN0', 3, 'currency code', {
+          required: true,
+          fixedLength: 3,
+          customValidate: isNumeric,
+        });
       } catch (err) {
         expect(err.message).toEqual('Value of currency code is invalid');
       }
@@ -337,7 +390,7 @@ describe('VietQrV1Decryptor', () => {
       } catch (err) {
         expect(err.message).toEqual('Field version in QR string must be start with 00.');
       }
-    })
+    });
     it('should return object without value', () => {
       const qrItem = decryptor.readQrItem({
         fieldId: VietQrFieldID.POSTAL_CODE,
@@ -387,28 +440,43 @@ describe('VietQrV1Decryptor', () => {
       expect(qrItem).toEqual({
         fieldId: VietQrFieldID.POSTAL_CODE,
         nextRawValue: '010501234',
-      })
+      });
     });
   });
 
   describe('isValidChecksum', () => {
     it('should return true', () => {
-      expect(decryptor.isValidChecksum('00020101021238500010A000000727012200069704030108123456780206QRCASH5204601153037045802VN5915NGUYEN HUU HUAN6005HANOI6105100006237052120190109155714228384707080000111164260002en0107shop vn0205Hanoi630476DA'))
-      .toBeTruthy();
+      expect(
+        decryptor.isValidChecksum(
+          '00020101021238500010A000000727012200069704030108123456780206QRCASH5204601153037045802VN5915NGUYEN HUU HUAN6005HANOI6105100006237052120190109155714228384707080000111164260002en0107shop vn0205Hanoi630476DA',
+        ),
+      ).toBeTruthy();
     });
     it('should return false', () => {
       // False by checksum value wrong length.
-      expect(decryptor.isValidChecksum('00020101021238500010A000000727012200069704030108123456780206QRCASH5204601153037045802VN5915NGUYEN HUU HUAN6005HANOI6105100006237052120190109155714228384707080000111164260002en0107shop vn0205Hanoi630476'))
-      .toBeFalsy();
+      expect(
+        decryptor.isValidChecksum(
+          '00020101021238500010A000000727012200069704030108123456780206QRCASH5204601153037045802VN5915NGUYEN HUU HUAN6005HANOI6105100006237052120190109155714228384707080000111164260002en0107shop vn0205Hanoi630476',
+        ),
+      ).toBeFalsy();
       // False by cannot find checksum field
-      expect(decryptor.isValidChecksum('00020101021238500010A000000727012200069704030108123456780206QRCASH5204601153037045802VN5915NGUYEN HUU HUAN6005HANOI6105100006237052120190109155714228384707080000111164260002en0107shop vn0205Hanoi'))
-      .toBeFalsy();
+      expect(
+        decryptor.isValidChecksum(
+          '00020101021238500010A000000727012200069704030108123456780206QRCASH5204601153037045802VN5915NGUYEN HUU HUAN6005HANOI6105100006237052120190109155714228384707080000111164260002en0107shop vn0205Hanoi',
+        ),
+      ).toBeFalsy();
       // false by invalid CRC checksum
-      expect(decryptor.isValidChecksum('00020101021238500010A000000727012200069704030108123456780206QRCASH5204601153037045802VN5915NGUYEN HUU HUAN6005HANOI6105100006237052120190109155714228384707080000111164260002en0107shop vn0205Hanoi630476AC'))
-      .toBeFalsy();
+      expect(
+        decryptor.isValidChecksum(
+          '00020101021238500010A000000727012200069704030108123456780206QRCASH5204601153037045802VN5915NGUYEN HUU HUAN6005HANOI6105100006237052120190109155714228384707080000111164260002en0107shop vn0205Hanoi630476AC',
+        ),
+      ).toBeFalsy();
       // false by checksum field wrong position
-      expect(decryptor.isValidChecksum('00020101021238500010A000000727012200069704030108123456780206QRCASH5204601153037045802VN5915NGUYEN HUU HUAN6005HANOI61051000062370521201901091557142283847070800001111630476DA64260002en0107shop vn0205Hanoi'))
-      .toBeFalsy();
-    })
-  })
+      expect(
+        decryptor.isValidChecksum(
+          '00020101021238500010A000000727012200069704030108123456780206QRCASH5204601153037045802VN5915NGUYEN HUU HUAN6005HANOI61051000062370521201901091557142283847070800001111630476DA64260002en0107shop vn0205Hanoi',
+        ),
+      ).toBeFalsy();
+    });
+  });
 });

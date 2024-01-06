@@ -20,3 +20,11 @@ export interface IDecryptedQrItem {
   value?: string;
   length?: number;
 }
+
+export interface IDecryptedQrDataOptions {
+  /**
+   * Remove all decrypted data object fields is optional and have value is empty or undefined
+   * @default true
+   */
+  lean?: boolean;
+}

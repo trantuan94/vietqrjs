@@ -1,6 +1,5 @@
 import {
   GUID,
-  IVietQrDataV1,
   VietQrVersion,
   VietQrInitiateMethod,
   VietQrFieldID,
@@ -9,25 +8,29 @@ import {
   AdditionalDataFieldID,
   LanguageTemplateFieldID,
   ServiceCode,
-  IBasicVietQrData,
   TipOrConvenienceIndicatorType,
-  IMerchantAccountInfo,
   DEFAULT_CURRENCY,
   DEFAULT_COUNTRY_CODE,
+} from '../constants/index';
+import {
+  IVietQrDataV1,
+  IBasicVietQrData,
+  IMerchantAccountInfo,
   IAdditionalData,
   ILanguageTemplate,
-} from '../constants/index';
-import { calcQrItemDataLength, createQRCode, calcCrcCheckSum } from '../utils';
+  IGenerateQROptions,
+} from '../interfaces/index';
+import {calcQrItemDataLength, createQRCode, calcCrcCheckSum} from '../utils';
 
 export class VietQRV1Builder {
   private data: IVietQrDataV1;
-  private qrCodeString: string;
+  private qrString: string;
 
   constructor() {
     this.initData();
   }
 
-  private initData() {
+  private initData(): VietQRV1Builder {
     this.data = {
       version: VietQrVersion.V1, // ID 00
       initMethod: VietQrInitiateMethod.STATIC, // ID 01
@@ -59,7 +62,7 @@ export class VietQRV1Builder {
     return this;
   }
 
-  public setMerchantAccountInfo(info: IMerchantAccountInfo) {
+  public setMerchantAccountInfo(info: IMerchantAccountInfo): VietQRV1Builder {
     const {
       beneficiaryOrg,
       guid = this.data.merchantAccInfo?.guid || GUID.NAPAS,
@@ -74,32 +77,32 @@ export class VietQRV1Builder {
     return this;
   }
 
-  public setMerchantName(merchantName: string) {
+  public setMerchantName(merchantName: string): VietQRV1Builder {
     this.data.merchantName = merchantName;
 
     return this;
   }
 
-  public setMerchantCity(merchantCity: string) {
+  public setMerchantCity(merchantCity: string): VietQRV1Builder {
     this.data.merchantCity = merchantCity;
 
     return this;
   }
 
-  public setPostalCode(postalCode: string) {
+  public setPostalCode(postalCode: string): VietQRV1Builder {
     this.data.postalCode = postalCode;
 
     return this;
   }
 
-  public setTxnAmount(amount: number) {
+  public setTxnAmount(amount: number): VietQRV1Builder {
     this.data.txnAmount = amount.toString();
     this.data.initMethod = VietQrInitiateMethod.DYNAMIC;
 
     return this;
   }
 
-  public setTxnDescription(description: string) {
+  public setTxnDescription(description: string): VietQRV1Builder {
     this.data.additionalData = {
       ...this.data.additionalData,
       purposeOfTxn: description,
@@ -108,19 +111,19 @@ export class VietQRV1Builder {
     return this;
   }
 
-  public setTxnCurrency(currencyCode = DEFAULT_CURRENCY) {
+  public setTxnCurrency(currencyCode: number = DEFAULT_CURRENCY): VietQRV1Builder {
     this.data.txnCurrency = currencyCode;
 
     return this;
   }
 
-  public setTxnCountry(countryCode = DEFAULT_COUNTRY_CODE) {
+  public setTxnCountry(countryCode: string = DEFAULT_COUNTRY_CODE): VietQRV1Builder {
     this.data.countryCode = countryCode;
 
     return this;
   }
 
-  public setAdditionalData(additionalData: IAdditionalData) {
+  public setAdditionalData(additionalData: IAdditionalData): VietQRV1Builder {
     this.data.additionalData = {
       ...this.data.additionalData,
       ...additionalData,
@@ -129,25 +132,33 @@ export class VietQRV1Builder {
     return this;
   }
 
-  public setLanguageTemplate(languageTemplate: ILanguageTemplate) {
+  public setLanguageTemplate(languageTemplate: ILanguageTemplate): VietQRV1Builder {
     this.data.languageTemplate = languageTemplate;
 
     return this;
   }
 
-  public setmerchantCategoryCode(mcc: string) {
+  /**
+   * @deprecated use setMerchantCategoryCode instead.
+   */
+  public setmerchantCategoryCode(mcc: string): VietQRV1Builder {
     this.data.merchantCategoryCode = mcc;
 
     return this;
   }
 
-  public refresh() {
+  public setMerchantCategoryCode(mcc: string): VietQRV1Builder {
+    this.data.merchantCategoryCode = mcc;
+    return this;
+  }
+
+  public refresh(): VietQRV1Builder {
     this.initData();
 
     return this;
   }
 
-  public quickBuild(input: IBasicVietQrData) {
+  public quickBuild(input: IBasicVietQrData): VietQRV1Builder {
     const {
       acquierId, // ID DVCNTT
       merchantId, // Tài khoản/Số thẻ thụ hưởng
@@ -174,8 +185,8 @@ export class VietQRV1Builder {
     return this.build();
   }
 
-  public build() {
-    let dataStr =
+  public build(): VietQRV1Builder {
+    const dataStr =
       this.genVersion() +
       this.genInitMethod() +
       this.genMerchantAccInfo() +
@@ -192,18 +203,25 @@ export class VietQRV1Builder {
       VietQrFieldID.CRC_CODE +
       '04';
 
-    this.qrCodeString = `${dataStr}${calcCrcCheckSum(dataStr)}`;
+    this.qrString = `${dataStr}${calcCrcCheckSum(dataStr)}`;
 
     return this;
   }
 
-  public getQrCodeString() {
-    return this.qrCodeString;
+  /**
+   * @deprecated use getQrString instead.
+   */
+  public getQrCodeString(): string {
+    return this.qrString;
   }
 
-  public async generateQR() {
+  public getQrString(): string {
+    return this.qrString;
+  }
+
+  public async generateQR(options?: IGenerateQROptions) {
     try {
-      return await createQRCode(this.qrCodeString, null, 150, 50);
+      return await createQRCode(this.qrString, options);
     } catch (err) {
       console.error(err);
     }
