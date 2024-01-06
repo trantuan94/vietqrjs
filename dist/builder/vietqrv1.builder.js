@@ -86,6 +86,10 @@ class VietQRV1Builder {
         this.data.merchantCategoryCode = mcc;
         return this;
     }
+    setMerchantCategoryCode(mcc) {
+        this.data.merchantCategoryCode = mcc;
+        return this;
+    }
     refresh() {
         this.initData();
         return this;
@@ -108,7 +112,7 @@ class VietQRV1Builder {
         return this.build();
     }
     build() {
-        let dataStr = this.genVersion() +
+        const dataStr = this.genVersion() +
             this.genInitMethod() +
             this.genMerchantAccInfo() +
             this.genCategoryCodeInfo() +
@@ -123,15 +127,18 @@ class VietQRV1Builder {
             this.genLanguageTemplateInfo() +
             index_1.VietQrFieldID.CRC_CODE +
             '04';
-        this.qrCodeString = `${dataStr}${(0, utils_1.calcCrcCheckSum)(dataStr)}`;
+        this.qrString = `${dataStr}${(0, utils_1.calcCrcCheckSum)(dataStr)}`;
         return this;
     }
     getQrCodeString() {
-        return this.qrCodeString;
+        return this.qrString;
     }
-    async generateQR() {
+    getQrString() {
+        return this.qrString;
+    }
+    async generateQR(options) {
         try {
-            return await (0, utils_1.createQRCode)(this.qrCodeString, null, 150, 50);
+            return await (0, utils_1.createQRCode)(this.qrString, options);
         }
         catch (err) {
             console.error(err);

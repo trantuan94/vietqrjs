@@ -3,11 +3,6 @@ import {
   AdditionalDataFieldName,
   BeneficaryOrganizationFieldID,
   BeneficaryOrganizationFieldName,
-  IAdditionalData,
-  IBeneficiaryOrganiation,
-  ILanguageTemplate,
-  IMerchantAccountInfo,
-  IVietQrDataV1,
   LanguageTemplateFieldID,
   LanguageTemplateFieldName,
   MerchantAccInfoFieldID,
@@ -20,7 +15,17 @@ import {
   VietQrInitiateMethod,
   VietQrVersion,
 } from '../constants';
-import { IDecryptedQrItem, IDecryptorElement, IDecryptorOptions } from './decryptor.interfaces';
+import {
+  IAdditionalData,
+  IBeneficiaryOrganiation,
+  ILanguageTemplate,
+  IMerchantAccountInfo,
+  IVietQrDataV1,
+  IDecryptedQrDataOptions,
+  IDecryptedQrItem,
+  IDecryptorElement,
+  IDecryptorOptions,
+} from '../interfaces';
 import {
   isANS,
   isFloatingPointAmount,
@@ -68,7 +73,7 @@ export class VietQrV1Decryptor {
     fieldName: string,
     options: IDecryptorOptions,
   ) {
-    const { required = true, maxLength, fixedLength, customValidate } = options;
+    const {required = true, maxLength, fixedLength, customValidate} = options;
     if (!value && required) {
       throw new Error(`Field ${fieldName} in QR string is required.`);
     }
@@ -76,7 +81,9 @@ export class VietQrV1Decryptor {
       throw new Error(`Length of ${fieldName} is not equal to defined length in QR string.`);
     }
     if (maxLength && maxLength < length) {
-      throw new Error(`Length of ${fieldName} in QR string must be less than or equal to ${maxLength}.`);
+      throw new Error(
+        `Length of ${fieldName} in QR string must be less than or equal to ${maxLength}.`,
+      );
     }
     if (fixedLength && fixedLength !== length) {
       throw new Error(`Length of ${fieldName} in QR string must be equal to ${fixedLength}.`);
@@ -92,12 +99,8 @@ export class VietQrV1Decryptor {
     fieldName: string,
     options: IDecryptorOptions,
   ): IDecryptedQrItem {
-    const { required = true } = options;
-    const {
-      value,
-      length,
-      nextRawValue,
-    } = this.readQrItem({
+    const {required = true} = options;
+    const {value, length, nextRawValue} = this.readQrItem({
       fieldId,
       fieldName,
       rawValue,
@@ -109,13 +112,8 @@ export class VietQrV1Decryptor {
         nextRawValue,
       };
     }
-    this.validateQrItem(
-      value as string,
-      length as number,
-      fieldName,
-      options,
-    );
-  
+    this.validateQrItem(value as string, length as number, fieldName, options);
+
     return {
       fieldId,
       fieldName,
@@ -132,7 +130,13 @@ export class VietQrV1Decryptor {
     return isValidChecksum(qrString);
   }
 
-  decrypt(qrString: string): IVietQrDataV1 {
+  /**
+   * Function to decrypt the QR string scanned from QR code
+   * @param qrString - the qr string you want to decrypt
+   * @param options - the output options of decrypted qr data
+   * @returns IVietQrDataV1
+   */
+  decrypt(qrString: string, options?: IDecryptedQrDataOptions): IVietQrDataV1 {
     // validate checksum first
     if (!isValidChecksum(qrString)) {
       throw new Error('QR string has invalid Cyclic Redundency checksum.');
@@ -186,7 +190,7 @@ export class VietQrV1Decryptor {
             VietQRFieldName.MERCHANT_ACCOUNT_INFO,
             {
               maxLength: 99,
-            }
+            },
           );
           nextRawStr = merchantAccountInfo.nextRawValue;
           break;
@@ -199,7 +203,7 @@ export class VietQrV1Decryptor {
               fixedLength: 4,
               required: false,
               customValidate: isNumeric,
-            }
+            },
           );
           nextRawStr = mcc.nextRawValue;
           break;
@@ -211,7 +215,7 @@ export class VietQrV1Decryptor {
             {
               fixedLength: 3,
               customValidate: isNumeric,
-            }
+            },
           );
           nextRawStr = currencyCode.nextRawValue;
           break;
@@ -364,43 +368,66 @@ export class VietQrV1Decryptor {
     if (!countryCode?.value) {
       throw new Error(`Field ${VietQRFieldName.COUNTRY_CODE} in QR is required.`);
     }
-    if (tipOrConvenienceIndicator?.value === TipOrConvenienceIndicatorType.FEE_PERCENTAGE &&
-      !convenienceFeePercentage?.value) {
+    if (
+      tipOrConvenienceIndicator?.value === TipOrConvenienceIndicatorType.FEE_PERCENTAGE &&
+      !convenienceFeePercentage?.value
+    ) {
       throw new Error(`${VietQRFieldName.CONVENIENCE_FEE_PERCENTAGE} in QR is required.`);
     }
-    if (tipOrConvenienceIndicator?.value === TipOrConvenienceIndicatorType.FEE_FIXED &&
-      !convenienceFeeFixed?.value) {
+    if (
+      tipOrConvenienceIndicator?.value === TipOrConvenienceIndicatorType.FEE_FIXED &&
+      !convenienceFeeFixed?.value
+    ) {
       throw new Error(`${VietQRFieldName.CONVENIENCE_FEE_FIXED} in QR is required.`);
     }
-  
+
     const decryptedMerchantAccInfo = this.decryptMerchantAccInfo(merchantAccountInfo.value);
-  
-    const decryptedLanguageTemplate: ILanguageTemplate | undefined =
-      languageTemplate?.value
-        ? this.decryptLanguageTemplate(languageTemplate?.value)
-        : undefined;
-  
-    const decryptedAdditionalData: IAdditionalData | undefined = additionalData?.value
-      ? this.decryptAdditionalData(additionalData.value)
+
+    const decryptedLanguageTemplate: ILanguageTemplate | undefined = languageTemplate?.value
+      ? this.decryptLanguageTemplate(languageTemplate?.value, options)
       : undefined;
+
+    const decryptedAdditionalData: IAdditionalData | undefined = additionalData?.value
+      ? this.decryptAdditionalData(additionalData.value, options)
+      : undefined;
+    const {lean = true} = options || {};
+
     return {
       version: version?.value as VietQrVersion,
       initMethod: initialMethod?.value as VietQrInitiateMethod,
       merchantAccInfo: decryptedMerchantAccInfo,
       merchantCategoryCode: mcc?.value as MerchantCategoryCode,
       txnCurrency: Number(currencyCode?.value),
-      txnAmount: transactionAmount?.value,
-      tipConvenienceIndicator: tipOrConvenienceIndicator?.value,
-      convenienceFeeFixed: convenienceFeeFixed?.value,
-      convenienceFeePercentage: convenienceFeePercentage?.value,
+      ...((!lean || (transactionAmount?.value && lean)) && {
+        txnAmount: transactionAmount?.value,
+      }),
+      ...((!lean || (tipOrConvenienceIndicator?.value && lean)) && {
+        tipConvenienceIndicator: tipOrConvenienceIndicator?.value,
+      }),
+      ...((!lean || (convenienceFeeFixed?.value && lean)) && {
+        convenienceFeeFixed: convenienceFeeFixed?.value,
+      }),
+      ...((!lean || (convenienceFeePercentage?.value && lean)) && {
+        convenienceFeePercentage: convenienceFeePercentage?.value,
+      }),
       countryCode: countryCode?.value,
-      merchantName: merchantName?.value,
-      merchantCity: merchantCity?.value,
-      postalCode: postalCode?.value,
-      additionalData: decryptedAdditionalData,
-      languageTemplate: decryptedLanguageTemplate,
+      ...((!lean || (merchantName?.value && lean)) && {
+        merchantName: merchantName?.value,
+      }),
+      ...((!lean || (merchantCity?.value && lean)) && {
+        merchantCity: merchantCity?.value,
+      }),
+      ...((!lean || (postalCode?.value && lean)) && {
+        postalCode: postalCode?.value,
+      }),
+      ...((!lean || (decryptedAdditionalData && lean)) && {
+        additionalData: decryptedAdditionalData,
+      }),
+      ...((!lean || (decryptedLanguageTemplate && lean)) && {
+        languageTemplate: decryptedLanguageTemplate,
+      }),
       crcCode: crcChecksum?.value,
-    }
+    };
   }
 
   decryptMerchantAccInfo(rawStr: string): IMerchantAccountInfo {
@@ -455,12 +482,16 @@ export class VietQrV1Decryptor {
           break;
       }
     }
-  
+
     if (!decryptedGUID?.value) {
-      throw new Error(`${MerchantAccInfoFieldName.GUID} in Merchant Account Information is required.`);
+      throw new Error(
+        `${MerchantAccInfoFieldName.GUID} in Merchant Account Information is required.`,
+      );
     }
     if (!beneficiaryOrg?.value) {
-      throw new Error(`${MerchantAccInfoFieldName.BENEFICIARY_ORGANIZATION} in Merchant Account Information is required.`);
+      throw new Error(
+        `${MerchantAccInfoFieldName.BENEFICIARY_ORGANIZATION} in Merchant Account Information is required.`,
+      );
     }
     const decryptedBeneficiaryOrg = this.decryptBeneficiaryOrg(beneficiaryOrg?.value);
     return {
@@ -508,10 +539,14 @@ export class VietQrV1Decryptor {
       }
     }
     if (!acquirerId?.value) {
-      throw new Error(`Field ${BeneficaryOrganizationFieldName.ACQUIER_ID} in Benificiary Organization is required.`);
+      throw new Error(
+        `Field ${BeneficaryOrganizationFieldName.ACQUIER_ID} in Benificiary Organization is required.`,
+      );
     }
     if (!merchantId?.value) {
-      throw new Error(`Field ${BeneficaryOrganizationFieldName.MERCHANT_ID} in Benificiary Organization is required.`);
+      throw new Error(
+        `Field ${BeneficaryOrganizationFieldName.MERCHANT_ID} in Benificiary Organization is required.`,
+      );
     }
     return {
       acquierId: acquirerId.value,
@@ -519,7 +554,7 @@ export class VietQrV1Decryptor {
     };
   }
 
-  decryptLanguageTemplate(rawStr: string): ILanguageTemplate {
+  decryptLanguageTemplate(rawStr: string, options?: IDecryptedQrDataOptions): ILanguageTemplate {
     let nextRawStr = rawStr;
     let decryptedPreference: IDecryptedQrItem;
     let decryptedMerchantName: IDecryptedQrItem;
@@ -539,7 +574,7 @@ export class VietQrV1Decryptor {
             {
               fixedLength: 2,
               customValidate: isANS,
-            }
+            },
           );
           nextRawStr = decryptedPreference.nextRawValue;
           break;
@@ -568,25 +603,35 @@ export class VietQrV1Decryptor {
           nextRawStr = decryptedMerchantCity.nextRawValue;
           break;
         default:
-          nextRawStr = this.ignoreUnknownQrItem(nextRawStr, 'Merchant Information Language Template');
+          nextRawStr = this.ignoreUnknownQrItem(
+            nextRawStr,
+            'Merchant Information Language Template',
+          );
           break;
       }
     }
     if (!decryptedPreference?.value) {
-      throw new Error(`${LanguageTemplateFieldName.LANGUAGE_PREFERENCE} in Language Template is required.`);
+      throw new Error(
+        `${LanguageTemplateFieldName.LANGUAGE_PREFERENCE} in Language Template is required.`,
+      );
     }
     if (!decryptedMerchantName?.value) {
-      throw new Error(`${LanguageTemplateFieldName.ALTERNATE_MERCHANT_NAME} in Language Template is required.`);
+      throw new Error(
+        `${LanguageTemplateFieldName.ALTERNATE_MERCHANT_NAME} in Language Template is required.`,
+      );
     }
-  
+    const {lean = true} = options || {};
+
     return {
       preference: decryptedPreference.value,
       merchantName: decryptedMerchantName.value,
-      merchantCity: decryptedMerchantCity?.value,
+      ...((!lean || (decryptedMerchantCity?.value && lean)) && {
+        merchantCity: decryptedMerchantCity?.value,
+      }),
     };
   }
 
-  decryptAdditionalData(rawStr: string): IAdditionalData {
+  decryptAdditionalData(rawStr: string, options?: IDecryptedQrDataOptions): IAdditionalData {
     let nextRawStr = rawStr;
     let billNumber: IDecryptedQrItem;
     let mobileNumber: IDecryptedQrItem;
@@ -614,7 +659,7 @@ export class VietQrV1Decryptor {
               required: false,
               customValidate: isANS,
             },
-          )
+          );
           nextRawStr = billNumber.nextRawValue;
           break;
         case AdditionalDataFieldID.MOBILE_NUMBER:
@@ -726,17 +771,36 @@ export class VietQrV1Decryptor {
           break;
       }
     }
+    const {lean = true} = options || {};
 
     return {
-      billNumber: billNumber?.value,
-      mobileNumber: mobileNumber?.value,
-      storeLabel: storeLabel?.value,
-      loyaltyNumber: loyaltyNumber?.value,
-      referenceLabel: referenceLabel?.value,
-      customerLabel: customerLabel?.value,
-      terminalLabel: terminalLabel?.value,
-      purposeOfTxn: purposeOfTxn?.value,
-      additionalConsumerDataReq: additionalConsumerDataReq?.value,
+      ...((!lean || (billNumber?.value && lean)) && {
+        billNumber: billNumber?.value,
+      }),
+      ...((!lean || (mobileNumber?.value && lean)) && {
+        mobileNumber: mobileNumber?.value,
+      }),
+      ...((!lean || (storeLabel?.value && lean)) && {
+        storeLabel: storeLabel?.value,
+      }),
+      ...((!lean || (loyaltyNumber?.value && lean)) && {
+        loyaltyNumber: loyaltyNumber?.value,
+      }),
+      ...((!lean || (referenceLabel?.value && lean)) && {
+        referenceLabel: referenceLabel?.value,
+      }),
+      ...((!lean || (customerLabel?.value && lean)) && {
+        customerLabel: customerLabel?.value,
+      }),
+      ...((!lean || (terminalLabel?.value && lean)) && {
+        terminalLabel: terminalLabel?.value,
+      }),
+      ...((!lean || (purposeOfTxn?.value && lean)) && {
+        purposeOfTxn: purposeOfTxn?.value,
+      }),
+      ...((!lean || (additionalConsumerDataReq?.value && lean)) && {
+        additionalConsumerDataReq: additionalConsumerDataReq?.value,
+      }),
     };
   }
 
@@ -744,7 +808,11 @@ export class VietQrV1Decryptor {
     const fieldId = rawValue.substring(0, 2);
     const length = Number(rawValue.substring(2, 4));
     if (Number.isNaN(length) || length <= 0) {
-      throw new Error(`Length of unknown field ID ${fieldId}${nestedFieldName ? ' in ' + nestedFieldName + ' field' : ''} of QR is invalid.`);
+      throw new Error(
+        `Length of unknown field ID ${fieldId}${
+          nestedFieldName ? ' in ' + nestedFieldName + ' field' : ''
+        } of QR is invalid.`,
+      );
     }
     const nextRawValue = rawValue.substring(4 + length);
     return nextRawValue;
