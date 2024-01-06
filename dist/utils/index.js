@@ -65,6 +65,7 @@ function isTipOrConvenienceIndicator(value) {
 exports.isTipOrConvenienceIndicator = isTipOrConvenienceIndicator;
 async function createQRCode(qrString, options) {
     const { logo = constants_1.DEFAULT_VIETQR_LOGO, width = 200, margin = 4, bgColor = '#ffffff', color = '#000000', errorCorrectionLevel = 'H', } = options || {};
+    console.log('qr code width', width);
     const canvas = (0, canvas_1.createCanvas)(width, width);
     QRCode.toCanvas(canvas, qrString, {
         errorCorrectionLevel,
