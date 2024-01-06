@@ -25,12 +25,14 @@
 
 ### Buy me a coffee
 If you feel my lib is useful, buy me a coffee, thanks!
-Vietnam Bank transfer
+MoMo Wallet transfer QR code:
 <p align="left">
-  <img src="./donate-account.png" width="200" />
+  <img src="./donate-account.jpg" width="200" />
 </p>
 
 ## Change Logs:
+### <b>v1.1.3</b>
+  - Update donation information :)
 ### <b>v1.1.2</b>
   - Add the 2nd parameter for VietQrV1Decryptor decrypt function to support return lean|full decrypted QR data object
   - Set the setmerchantCategoryCode and getQrCodeString function in VietQRV1Builder class is deprecated, instead by setMerchantCategoryCode and getQrString function
