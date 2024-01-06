@@ -18,3 +18,6 @@ export interface IDecryptedQrItem {
     value?: string;
     length?: number;
 }
+export interface IDecryptedQrDataOptions {
+    lean?: boolean;
+}

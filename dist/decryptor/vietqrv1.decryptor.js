@@ -48,7 +48,7 @@ class VietQrV1Decryptor {
     }
     decryptQrItem(rawValue, fieldId, fieldName, options) {
         const { required = true } = options;
-        const { value, length, nextRawValue, } = this.readQrItem({
+        const { value, length, nextRawValue } = this.readQrItem({
             fieldId,
             fieldName,
             rawValue,
@@ -75,7 +75,7 @@ class VietQrV1Decryptor {
         }
         return (0, utils_1.isValidChecksum)(qrString);
     }
-    decrypt(qrString) {
+    decrypt(qrString, options) {
         if (!(0, utils_1.isValidChecksum)(qrString)) {
             throw new Error('QR string has invalid Cyclic Redundency checksum.');
         }
@@ -236,29 +236,31 @@ class VietQrV1Decryptor {
         }
         const decryptedMerchantAccInfo = this.decryptMerchantAccInfo(merchantAccountInfo.value);
         const decryptedLanguageTemplate = (languageTemplate === null || languageTemplate === void 0 ? void 0 : languageTemplate.value)
-            ? this.decryptLanguageTemplate(languageTemplate === null || languageTemplate === void 0 ? void 0 : languageTemplate.value)
+            ? this.decryptLanguageTemplate(languageTemplate === null || languageTemplate === void 0 ? void 0 : languageTemplate.value, options)
             : undefined;
         const decryptedAdditionalData = (additionalData === null || additionalData === void 0 ? void 0 : additionalData.value)
-            ? this.decryptAdditionalData(additionalData.value)
+            ? this.decryptAdditionalData(additionalData.value, options)
             : undefined;
-        return {
-            version: version === null || version === void 0 ? void 0 : version.value,
-            initMethod: initialMethod === null || initialMethod === void 0 ? void 0 : initialMethod.value,
-            merchantAccInfo: decryptedMerchantAccInfo,
-            merchantCategoryCode: mcc === null || mcc === void 0 ? void 0 : mcc.value,
-            txnCurrency: Number(currencyCode === null || currencyCode === void 0 ? void 0 : currencyCode.value),
+        const { lean = true } = options || {};
+        return Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({ version: version === null || version === void 0 ? void 0 : version.value, initMethod: initialMethod === null || initialMethod === void 0 ? void 0 : initialMethod.value, merchantAccInfo: decryptedMerchantAccInfo, merchantCategoryCode: mcc === null || mcc === void 0 ? void 0 : mcc.value, txnCurrency: Number(currencyCode === null || currencyCode === void 0 ? void 0 : currencyCode.value) }, ((!lean || ((transactionAmount === null || transactionAmount === void 0 ? void 0 : transactionAmount.value) && lean)) && {
             txnAmount: transactionAmount === null || transactionAmount === void 0 ? void 0 : transactionAmount.value,
+        })), ((!lean || ((tipOrConvenienceIndicator === null || tipOrConvenienceIndicator === void 0 ? void 0 : tipOrConvenienceIndicator.value) && lean)) && {
             tipConvenienceIndicator: tipOrConvenienceIndicator === null || tipOrConvenienceIndicator === void 0 ? void 0 : tipOrConvenienceIndicator.value,
+        })), ((!lean || ((convenienceFeeFixed === null || convenienceFeeFixed === void 0 ? void 0 : convenienceFeeFixed.value) && lean)) && {
             convenienceFeeFixed: convenienceFeeFixed === null || convenienceFeeFixed === void 0 ? void 0 : convenienceFeeFixed.value,
+        })), ((!lean || ((convenienceFeePercentage === null || convenienceFeePercentage === void 0 ? void 0 : convenienceFeePercentage.value) && lean)) && {
             convenienceFeePercentage: convenienceFeePercentage === null || convenienceFeePercentage === void 0 ? void 0 : convenienceFeePercentage.value,
-            countryCode: countryCode === null || countryCode === void 0 ? void 0 : countryCode.value,
+        })), { countryCode: countryCode === null || countryCode === void 0 ? void 0 : countryCode.value }), ((!lean || ((merchantName === null || merchantName === void 0 ? void 0 : merchantName.value) && lean)) && {
             merchantName: merchantName === null || merchantName === void 0 ? void 0 : merchantName.value,
+        })), ((!lean || ((merchantCity === null || merchantCity === void 0 ? void 0 : merchantCity.value) && lean)) && {
             merchantCity: merchantCity === null || merchantCity === void 0 ? void 0 : merchantCity.value,
+        })), ((!lean || ((postalCode === null || postalCode === void 0 ? void 0 : postalCode.value) && lean)) && {
             postalCode: postalCode === null || postalCode === void 0 ? void 0 : postalCode.value,
+        })), ((!lean || (decryptedAdditionalData && lean)) && {
             additionalData: decryptedAdditionalData,
+        })), ((!lean || (decryptedLanguageTemplate && lean)) && {
             languageTemplate: decryptedLanguageTemplate,
-            crcCode: crcChecksum === null || crcChecksum === void 0 ? void 0 : crcChecksum.value,
-        };
+        })), { crcCode: crcChecksum === null || crcChecksum === void 0 ? void 0 : crcChecksum.value });
     }
     decryptMerchantAccInfo(rawStr) {
         let nextRawStr = rawStr;
@@ -348,7 +350,7 @@ class VietQrV1Decryptor {
             merchantId: merchantId.value,
         };
     }
-    decryptLanguageTemplate(rawStr) {
+    decryptLanguageTemplate(rawStr, options) {
         let nextRawStr = rawStr;
         let decryptedPreference;
         let decryptedMerchantName;
@@ -391,13 +393,12 @@ class VietQrV1Decryptor {
         if (!(decryptedMerchantName === null || decryptedMerchantName === void 0 ? void 0 : decryptedMerchantName.value)) {
             throw new Error(`${constants_1.LanguageTemplateFieldName.ALTERNATE_MERCHANT_NAME} in Language Template is required.`);
         }
-        return {
-            preference: decryptedPreference.value,
-            merchantName: decryptedMerchantName.value,
+        const { lean = true } = options || {};
+        return Object.assign({ preference: decryptedPreference.value, merchantName: decryptedMerchantName.value }, ((!lean || ((decryptedMerchantCity === null || decryptedMerchantCity === void 0 ? void 0 : decryptedMerchantCity.value) && lean)) && {
             merchantCity: decryptedMerchantCity === null || decryptedMerchantCity === void 0 ? void 0 : decryptedMerchantCity.value,
-        };
+        }));
     }
-    decryptAdditionalData(rawStr) {
+    decryptAdditionalData(rawStr, options) {
         let nextRawStr = rawStr;
         let billNumber;
         let mobileNumber;
@@ -491,17 +492,26 @@ class VietQrV1Decryptor {
                     break;
             }
         }
-        return {
+        const { lean = true } = options || {};
+        return Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({}, ((!lean || ((billNumber === null || billNumber === void 0 ? void 0 : billNumber.value) && lean)) && {
             billNumber: billNumber === null || billNumber === void 0 ? void 0 : billNumber.value,
+        })), ((!lean || ((mobileNumber === null || mobileNumber === void 0 ? void 0 : mobileNumber.value) && lean)) && {
             mobileNumber: mobileNumber === null || mobileNumber === void 0 ? void 0 : mobileNumber.value,
+        })), ((!lean || ((storeLabel === null || storeLabel === void 0 ? void 0 : storeLabel.value) && lean)) && {
             storeLabel: storeLabel === null || storeLabel === void 0 ? void 0 : storeLabel.value,
+        })), ((!lean || ((loyaltyNumber === null || loyaltyNumber === void 0 ? void 0 : loyaltyNumber.value) && lean)) && {
             loyaltyNumber: loyaltyNumber === null || loyaltyNumber === void 0 ? void 0 : loyaltyNumber.value,
+        })), ((!lean || ((referenceLabel === null || referenceLabel === void 0 ? void 0 : referenceLabel.value) && lean)) && {
             referenceLabel: referenceLabel === null || referenceLabel === void 0 ? void 0 : referenceLabel.value,
+        })), ((!lean || ((customerLabel === null || customerLabel === void 0 ? void 0 : customerLabel.value) && lean)) && {
             customerLabel: customerLabel === null || customerLabel === void 0 ? void 0 : customerLabel.value,
+        })), ((!lean || ((terminalLabel === null || terminalLabel === void 0 ? void 0 : terminalLabel.value) && lean)) && {
             terminalLabel: terminalLabel === null || terminalLabel === void 0 ? void 0 : terminalLabel.value,
+        })), ((!lean || ((purposeOfTxn === null || purposeOfTxn === void 0 ? void 0 : purposeOfTxn.value) && lean)) && {
             purposeOfTxn: purposeOfTxn === null || purposeOfTxn === void 0 ? void 0 : purposeOfTxn.value,
+        })), ((!lean || ((additionalConsumerDataReq === null || additionalConsumerDataReq === void 0 ? void 0 : additionalConsumerDataReq.value) && lean)) && {
             additionalConsumerDataReq: additionalConsumerDataReq === null || additionalConsumerDataReq === void 0 ? void 0 : additionalConsumerDataReq.value,
-        };
+        }));
     }
     ignoreUnknownQrItem(rawValue, nestedFieldName) {
         const fieldId = rawValue.substring(0, 2);

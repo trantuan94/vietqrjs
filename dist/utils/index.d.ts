@@ -1,3 +1,4 @@
+import { IGenerateQROptions } from '../interfaces/index';
 export declare function getEnumKeys<T extends string | number>(e: Record<string, T>): string[];
 export declare function getEnumValues<T extends string | number>(e: Record<string, T>): T[];
 export declare function isValidCountryCode(countryCode: string): boolean;
@@ -11,4 +12,4 @@ export declare function isValidChecksum(rawValue: string): boolean;
 export declare function calcQrItemDataLength(data: string | number): string;
 export declare function calcCrcCheckSum(value: string): string;
 export declare function isTipOrConvenienceIndicator(value: string): boolean;
-export declare function createQRCode(dataForQRcode: any, center_image: any, width: any, cwidth: any): Promise<string>;
+export declare function createQRCode(qrString: string, options?: IGenerateQROptions): Promise<string>;
