@@ -1,6 +1,6 @@
 {
   "name": "vietqrjs",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "description": "Support generate VietQR Code",
   "main": "dist/index.js",
   "scripts": {
@@ -23,33 +23,33 @@
   "author": "Tuan Tran",
   "license": "MIT",
   "devDependencies": {
-    "@types/jest": "^29.5.11",
-    "@types/lodash": "^4.14.202",
-    "@types/node": "^20.10.5",
-    "@typescript-eslint/eslint-plugin": "^6.17.0",
-    "@typescript-eslint/parser": "^6.17.0",
-    "eslint": "^8.56.0",
-    "eslint-config-prettier": "^8.10.0",
-    "eslint-plugin-deprecation": "^2.0.0",
-    "eslint-plugin-prettier": "^4.2.1",
-    "husky": "^6.0.0",
-    "jest": "^29.7.0",
+    "@types/jest": "^30.0.0",
+    "@types/lodash": "^4.17.23",
+    "@types/node": "^25.2.2",
+    "@typescript-eslint/eslint-plugin": "^8.55.0",
+    "@typescript-eslint/parser": "^8.55.0",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "husky": "^9.1.7",
+    "jest": "^30.2.0",
     "jest-junit": "^16.0.0",
-    "prettier": "^2.8.8",
-    "pretty-quick": "^3.1.0",
-    "supertest": "^6.1.3",
-    "ts-jest": "^29.1.1",
-    "ts-loader": "^9.5.1",
-    "ts-node": "^10.0.0",
-    "tsconfig-paths": "^3.9.0",
-    "typescript": "^4.4.3"
+    "or": "^0.2.0",
+    "prettier": "^3.8.1",
+    "pretty-quick": "^4.2.1",
+    "supertest": "^7.2.2",
+    "ts-jest": "^29.4.6",
+    "ts-loader": "^9.5.4",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.9.3"
   },
   "dependencies": {
-    "canvas": "^2.8.0",
+    "canvas": "^3.2.1",
     "country-data": "^0.0.31",
     "crc": "^4.3.2",
-    "lodash": "^4.17.21",
-    "qrcode": "^1.4.4"
+    "lodash": "^4.17.23",
+    "qrcode": "^1.5.4"
   },
   "jest": {
     "moduleFileExtensions": [
