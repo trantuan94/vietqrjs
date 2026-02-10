@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="52" failures="0" errors="0" time="3.587">
-  <testsuite name="VietQrV1Decryptor" errors="0" failures="0" skipped="0" timestamp="2024-01-06T11:51:33" time="3.08" tests="26">
-    <testcase classname="VietQrV1Decryptor decrypt decrypt qrpush payment product" name="VietQrV1Decryptor decrypt decrypt qrpush payment product" time="0.01">
+<testsuites name="jest tests" tests="52" failures="0" errors="0" time="2.39">
+  <testsuite name="VietQrV1Decryptor" errors="0" failures="0" skipped="0" timestamp="2026-02-10T07:33:48" time="1.605" tests="26">
+    <testcase classname="VietQrV1Decryptor decrypt decrypt qrpush payment product" name="VietQrV1Decryptor decrypt decrypt qrpush payment product" time="0.008">
     </testcase>
     <testcase classname="VietQrV1Decryptor decrypt decrypt qrpush payment product with RFU EMVCo field " name="VietQrV1Decryptor decrypt decrypt qrpush payment product with RFU EMVCo field " time="0.001">
     </testcase>
-    <testcase classname="VietQrV1Decryptor decrypt decrypt cash withdrawl service" name="VietQrV1Decryptor decrypt decrypt cash withdrawl service" time="0.002">
+    <testcase classname="VietQrV1Decryptor decrypt decrypt cash withdrawl service" name="VietQrV1Decryptor decrypt decrypt cash withdrawl service" time="0.001">
     </testcase>
     <testcase classname="VietQrV1Decryptor decrypt should throw error by invalid checksum" name="VietQrV1Decryptor decrypt should throw error by invalid checksum" time="0.001">
     </testcase>
-    <testcase classname="VietQrV1Decryptor decrypt should throw error by validate required fields" name="VietQrV1Decryptor decrypt should throw error by validate required fields" time="0.003">
+    <testcase classname="VietQrV1Decryptor decrypt should throw error by validate required fields" name="VietQrV1Decryptor decrypt should throw error by validate required fields" time="0.001">
     </testcase>
-    <testcase classname="VietQrV1Decryptor decrypt should throw error by tip or convenience" name="VietQrV1Decryptor decrypt should throw error by tip or convenience" time="0.004">
+    <testcase classname="VietQrV1Decryptor decrypt should throw error by tip or convenience" name="VietQrV1Decryptor decrypt should throw error by tip or convenience" time="0.001">
     </testcase>
     <testcase classname="VietQrV1Decryptor decryptBeneficiaryOrg should return acquier info" name="VietQrV1Decryptor decryptBeneficiaryOrg should return acquier info" time="0.001">
     </testcase>
-    <testcase classname="VietQrV1Decryptor decryptBeneficiaryOrg should be throw an Error by required field not found" name="VietQrV1Decryptor decryptBeneficiaryOrg should be throw an Error by required field not found" time="0.001">
+    <testcase classname="VietQrV1Decryptor decryptBeneficiaryOrg should be throw an Error by required field not found" name="VietQrV1Decryptor decryptBeneficiaryOrg should be throw an Error by required field not found" time="0">
     </testcase>
-    <testcase classname="VietQrV1Decryptor decryptMerchantAccInfo should return value" name="VietQrV1Decryptor decryptMerchantAccInfo should return value" time="0">
+    <testcase classname="VietQrV1Decryptor decryptMerchantAccInfo should return value" name="VietQrV1Decryptor decryptMerchantAccInfo should return value" time="0.001">
     </testcase>
     <testcase classname="VietQrV1Decryptor decryptMerchantAccInfo should throw error by do not have guid field" name="VietQrV1Decryptor decryptMerchantAccInfo should throw error by do not have guid field" time="0">
     </testcase>
-    <testcase classname="VietQrV1Decryptor decryptMerchantAccInfo should throw error by do not have beneficiary organization field" name="VietQrV1Decryptor decryptMerchantAccInfo should throw error by do not have beneficiary organization field" time="0.001">
+    <testcase classname="VietQrV1Decryptor decryptMerchantAccInfo should throw error by do not have beneficiary organization field" name="VietQrV1Decryptor decryptMerchantAccInfo should throw error by do not have beneficiary organization field" time="0">
     </testcase>
     <testcase classname="VietQrV1Decryptor decryptLanguageTemplate should return language template" name="VietQrV1Decryptor decryptLanguageTemplate should return language template" time="0.001">
     </testcase>
@@ -29,85 +29,85 @@
     </testcase>
     <testcase classname="VietQrV1Decryptor decryptAdditionalData should return value" name="VietQrV1Decryptor decryptAdditionalData should return value" time="0.001">
     </testcase>
-    <testcase classname="VietQrV1Decryptor validateQrItem should be throw by invalid length of value" name="VietQrV1Decryptor validateQrItem should be throw by invalid length of value" time="0.001">
+    <testcase classname="VietQrV1Decryptor validateQrItem should be throw by invalid length of value" name="VietQrV1Decryptor validateQrItem should be throw by invalid length of value" time="0">
     </testcase>
-    <testcase classname="VietQrV1Decryptor validateQrItem should be throw error by value is empty and field is required" name="VietQrV1Decryptor validateQrItem should be throw error by value is empty and field is required" time="0.001">
+    <testcase classname="VietQrV1Decryptor validateQrItem should be throw error by value is empty and field is required" name="VietQrV1Decryptor validateQrItem should be throw error by value is empty and field is required" time="0">
     </testcase>
     <testcase classname="VietQrV1Decryptor validateQrItem should be throw error by value length greater than max length" name="VietQrV1Decryptor validateQrItem should be throw error by value length greater than max length" time="0">
     </testcase>
     <testcase classname="VietQrV1Decryptor validateQrItem should be throw error by value length not equals to fixed length" name="VietQrV1Decryptor validateQrItem should be throw error by value length not equals to fixed length" time="0.001">
     </testcase>
-    <testcase classname="VietQrV1Decryptor validateQrItem should be throw error by value not passed custom validator" name="VietQrV1Decryptor validateQrItem should be throw error by value not passed custom validator" time="0.001">
+    <testcase classname="VietQrV1Decryptor validateQrItem should be throw error by value not passed custom validator" name="VietQrV1Decryptor validateQrItem should be throw error by value not passed custom validator" time="0">
     </testcase>
     <testcase classname="VietQrV1Decryptor readQrItem should throw error by string not start with id" name="VietQrV1Decryptor readQrItem should throw error by string not start with id" time="0">
     </testcase>
-    <testcase classname="VietQrV1Decryptor readQrItem should return object without value" name="VietQrV1Decryptor readQrItem should return object without value" time="0.001">
+    <testcase classname="VietQrV1Decryptor readQrItem should return object without value" name="VietQrV1Decryptor readQrItem should return object without value" time="0">
     </testcase>
-    <testcase classname="VietQrV1Decryptor readQrItem should throw error by wrong length" name="VietQrV1Decryptor readQrItem should throw error by wrong length" time="0">
+    <testcase classname="VietQrV1Decryptor readQrItem should throw error by wrong length" name="VietQrV1Decryptor readQrItem should throw error by wrong length" time="0.001">
     </testcase>
     <testcase classname="VietQrV1Decryptor ignoreUnknownQrItem should throw error by defined length of field is invalid" name="VietQrV1Decryptor ignoreUnknownQrItem should throw error by defined length of field is invalid" time="0">
     </testcase>
-    <testcase classname="VietQrV1Decryptor decryptQrItem should return object without value field" name="VietQrV1Decryptor decryptQrItem should return object without value field" time="0.001">
+    <testcase classname="VietQrV1Decryptor decryptQrItem should return object without value field" name="VietQrV1Decryptor decryptQrItem should return object without value field" time="0">
     </testcase>
-    <testcase classname="VietQrV1Decryptor isValidChecksum should return true" name="VietQrV1Decryptor isValidChecksum should return true" time="0.002">
+    <testcase classname="VietQrV1Decryptor isValidChecksum should return true" name="VietQrV1Decryptor isValidChecksum should return true" time="0.001">
     </testcase>
-    <testcase classname="VietQrV1Decryptor isValidChecksum should return false" name="VietQrV1Decryptor isValidChecksum should return false" time="0.001">
+    <testcase classname="VietQrV1Decryptor isValidChecksum should return false" name="VietQrV1Decryptor isValidChecksum should return false" time="0">
     </testcase>
   </testsuite>
-  <testsuite name="getEnumKeys" errors="0" failures="0" skipped="0" timestamp="2024-01-06T11:51:33" time="3.175" tests="20">
-    <testcase classname="getEnumKeys getEnumKeys done" name="getEnumKeys getEnumKeys done" time="0.007">
+  <testsuite name="getEnumKeys" errors="0" failures="0" skipped="0" timestamp="2026-02-10T07:33:48" time="1.681" tests="20">
+    <testcase classname="getEnumKeys getEnumKeys done" name="getEnumKeys getEnumKeys done" time="0.004">
     </testcase>
     <testcase classname="getEnumValues getEnumValues done" name="getEnumValues getEnumValues done" time="0.001">
     </testcase>
-    <testcase classname="isValidCountryCode case valid country code should return true" name="isValidCountryCode case valid country code should return true" time="0.001">
+    <testcase classname="isValidCountryCode case valid country code should return true" name="isValidCountryCode case valid country code should return true" time="0">
     </testcase>
-    <testcase classname="isValidCountryCode invalid country code should return false" name="isValidCountryCode invalid country code should return false" time="0">
+    <testcase classname="isValidCountryCode invalid country code should return false" name="isValidCountryCode invalid country code should return false" time="0.001">
     </testcase>
     <testcase classname="isValidCurrencyCode should return true" name="isValidCurrencyCode should return true" time="0">
     </testcase>
     <testcase classname="isValidCurrencyCode should return false" name="isValidCurrencyCode should return false" time="0">
     </testcase>
-    <testcase classname="isServiceCode should return true" name="isServiceCode should return true" time="0.002">
+    <testcase classname="isServiceCode should return true" name="isServiceCode should return true" time="0.001">
     </testcase>
     <testcase classname="isServiceCode should return false" name="isServiceCode should return false" time="0">
     </testcase>
-    <testcase classname="isNumeric should be return true" name="isNumeric should be return true" time="0.001">
+    <testcase classname="isNumeric should be return true" name="isNumeric should be return true" time="0">
     </testcase>
-    <testcase classname="isNumeric should be return false" name="isNumeric should be return false" time="0.001">
+    <testcase classname="isNumeric should be return false" name="isNumeric should be return false" time="0">
     </testcase>
-    <testcase classname="isFloatingPointAmount should be return true" name="isFloatingPointAmount should be return true" time="0.001">
+    <testcase classname="isFloatingPointAmount should be return true" name="isFloatingPointAmount should be return true" time="0">
     </testcase>
-    <testcase classname="isFloatingPointAmount should be return false" name="isFloatingPointAmount should be return false" time="0">
+    <testcase classname="isFloatingPointAmount should be return false" name="isFloatingPointAmount should be return false" time="0.001">
     </testcase>
-    <testcase classname="isANS valid" name="isANS valid" time="0.001">
+    <testcase classname="isANS valid" name="isANS valid" time="0">
     </testcase>
-    <testcase classname="isANS is not valid" name="isANS is not valid" time="0.001">
+    <testcase classname="isANS is not valid" name="isANS is not valid" time="0">
     </testcase>
-    <testcase classname="isAN valid" name="isAN valid" time="0.001">
+    <testcase classname="isAN valid" name="isAN valid" time="0">
     </testcase>
-    <testcase classname="isAN is not valid" name="isAN is not valid" time="0.001">
+    <testcase classname="isAN is not valid" name="isAN is not valid" time="0">
     </testcase>
-    <testcase classname="isValidChecksum should be return true" name="isValidChecksum should be return true" time="0.001">
+    <testcase classname="isValidChecksum should be return true" name="isValidChecksum should be return true" time="0">
     </testcase>
-    <testcase classname="isValidChecksum should be return false" name="isValidChecksum should be return false" time="0.001">
+    <testcase classname="isValidChecksum should be return false" name="isValidChecksum should be return false" time="0">
     </testcase>
-    <testcase classname="calcQrItemDataLength should return valid length" name="calcQrItemDataLength should return valid length" time="0.001">
+    <testcase classname="calcQrItemDataLength should return valid length" name="calcQrItemDataLength should return valid length" time="0">
     </testcase>
     <testcase classname="calcCrcCheckSum should return crc" name="calcCrcCheckSum should return crc" time="0.001">
     </testcase>
   </testsuite>
-  <testsuite name="VietQRV1Builder" errors="0" failures="0" skipped="0" timestamp="2024-01-06T11:51:33" time="3.292" tests="6">
+  <testsuite name="VietQRV1Builder" errors="0" failures="0" skipped="0" timestamp="2026-02-10T07:33:48" time="1.781" tests="6">
     <testcase classname="VietQRV1Builder quickBuild render static qr string with service code account number type success" name="VietQRV1Builder quickBuild render static qr string with service code account number type success" time="0.008">
     </testcase>
-    <testcase classname="VietQRV1Builder quickBuild render static qr string with service code card number type success" name="VietQRV1Builder quickBuild render static qr string with service code card number type success" time="0.002">
+    <testcase classname="VietQRV1Builder quickBuild render static qr string with service code card number type success" name="VietQRV1Builder quickBuild render static qr string with service code card number type success" time="0.001">
     </testcase>
-    <testcase classname="VietQRV1Builder quickBuild render static qr string with service cash withdrawl" name="VietQRV1Builder quickBuild render static qr string with service cash withdrawl" time="0.001">
+    <testcase classname="VietQRV1Builder quickBuild render static qr string with service cash withdrawl" name="VietQRV1Builder quickBuild render static qr string with service cash withdrawl" time="0.002">
     </testcase>
     <testcase classname="VietQRV1Builder build render static qr string with service cash withdrawl" name="VietQRV1Builder build render static qr string with service cash withdrawl" time="0.001">
     </testcase>
     <testcase classname="VietQRV1Builder build render dynamic qr string with service payment product" name="VietQRV1Builder build render dynamic qr string with service payment product" time="0.001">
     </testcase>
-    <testcase classname="VietQRV1Builder generateQR generate base64 png image" name="VietQRV1Builder generateQR generate base64 png image" time="0.082">
+    <testcase classname="VietQRV1Builder generateQR generate base64 png image" name="VietQRV1Builder generateQR generate base64 png image" time="0.085">
     </testcase>
   </testsuite>
 </testsuites>
