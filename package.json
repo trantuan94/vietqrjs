@@ -1,7 +1,7 @@
 {
   "name": "vietqrjs",
-  "version": "1.1.4",
-  "description": "Support generate VietQR Code",
+  "version": "1.1.5",
+  "description": "Package support generate or decode VietQR code",
   "main": "dist/index.js",
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.build.json",
@@ -24,8 +24,8 @@
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "^30.0.0",
-    "@types/lodash": "^4.17.23",
-    "@types/node": "^25.2.2",
+    "@types/lodash": "^4.17.24",
+    "@types/node": "^25.6.0",
     "@typescript-eslint/eslint-plugin": "^8.55.0",
     "@typescript-eslint/parser": "^8.55.0",
     "eslint": "^9.39.1",
@@ -45,10 +45,10 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "canvas": "^3.2.1",
+    "canvas": "^3.2.3",
     "country-data": "^0.0.31",
     "crc": "^4.3.2",
-    "lodash": "^4.17.23",
+    "lodash": "^4.18.1",
     "qrcode": "^1.5.4"
   },
   "jest": {
