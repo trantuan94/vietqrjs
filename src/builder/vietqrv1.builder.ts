@@ -138,15 +138,6 @@ export class VietQRV1Builder {
     return this;
   }
 
-  /**
-   * @deprecated use setMerchantCategoryCode instead.
-   */
-  public setmerchantCategoryCode(mcc: string): VietQRV1Builder {
-    this.data.merchantCategoryCode = mcc;
-
-    return this;
-  }
-
   public setMerchantCategoryCode(mcc: string): VietQRV1Builder {
     this.data.merchantCategoryCode = mcc;
     return this;
@@ -160,9 +151,9 @@ export class VietQRV1Builder {
 
   public quickBuild(input: IBasicVietQrData): VietQRV1Builder {
     const {
-      acquierId, // ID DVCNTT
-      merchantId, // Tài khoản/Số thẻ thụ hưởng
-      serviceCode = ServiceCode.BY_ACCOUNT_NUMBER, // Loại merchantId (thẻ/ số tk)
+      acquierId,
+      merchantId,
+      serviceCode = ServiceCode.BY_ACCOUNT_NUMBER,
       amount,
       txnDescription,
     } = input;
@@ -186,33 +177,26 @@ export class VietQRV1Builder {
   }
 
   public build(): VietQRV1Builder {
-    const dataStr =
-      this.genVersion() +
-      this.genInitMethod() +
-      this.genMerchantAccInfo() +
-      this.genCategoryCodeInfo() +
-      this.genCurrencyInfo() +
-      this.genAmountInfo() +
-      this.genTipOrConvenienceIndicatorInfo() +
-      this.genCountryCodeInfo() +
-      this.genMerchantNameInfo() +
-      this.genMerchantCityInfo() +
-      this.genPostalCodeInfo() +
-      this.genAdditionalData() +
-      this.genLanguageTemplateInfo() +
-      VietQrFieldID.CRC_CODE +
-      '04';
+    const rawQrStr = [
+      this.genVersion(),
+      this.genInitMethod(),
+      this.genMerchantAccInfo(),
+      this.genCategoryCodeInfo(),
+      this.genCurrencyInfo(),
+      this.genAmountInfo(),
+      this.genTipOrConvenienceIndicatorInfo(),
+      this.genCountryCodeInfo(),
+      this.genMerchantNameInfo(),
+      this.genMerchantCityInfo(),
+      this.genPostalCodeInfo(),
+      this.genAdditionalData(),
+      this.genLanguageTemplateInfo(),
+      VietQrFieldID.CRC_CODE + '04',
+    ].join('');
 
-    this.qrString = `${dataStr}${calcCrcCheckSum(dataStr)}`;
+    this.qrString = rawQrStr + calcCrcCheckSum(rawQrStr);
 
     return this;
-  }
-
-  /**
-   * @deprecated use getQrString instead.
-   */
-  public getQrCodeString(): string {
-    return this.qrString;
   }
 
   public getQrString(): string {
@@ -339,114 +323,41 @@ export class VietQRV1Builder {
   }
 
   private genAdditionalData(): string {
-    return this.data.additionalData
-      ? this.genBasicQrStringItem(
-          VietQrFieldID.ADDITIONAL_DATA,
-          this.genBillNumberInfo() +
-            this.genMobileNumberInfo() +
-            this.genStoreLabelInfo() +
-            this.genLoyaltyNumberInfo() +
-            this.genreferenceLabelInfo() +
-            this.genCustomerLabelInfo() +
-            this.genTerminalLabelInfo() +
-            this.genPurposeOfTxnInfo() +
-            this.genAdditionalConsumerDataReq(),
-        )
-      : '';
-  }
-
-  private genBillNumberInfo() {
-    return this.genBasicQrStringItem(
-      AdditionalDataFieldID.BILL_NUMBER,
-      this.data?.additionalData?.billNumber || null,
-    );
-  }
-
-  private genMobileNumberInfo(): string {
-    return this.genBasicQrStringItem(
-      AdditionalDataFieldID.MOBILE_NUMBER,
-      this.data?.additionalData?.mobileNumber || null,
-    );
-  }
-
-  private genStoreLabelInfo(): string {
-    return this.genBasicQrStringItem(
-      AdditionalDataFieldID.STORE_LABEL,
-      this.data?.additionalData?.storeLabel || null,
-    );
-  }
-
-  private genLoyaltyNumberInfo(): string {
-    return this.genBasicQrStringItem(
-      AdditionalDataFieldID.LOYALTY_NUMBER,
-      this.data?.additionalData?.loyaltyNumber || null,
-    );
-  }
-
-  private genreferenceLabelInfo(): string {
-    return this.genBasicQrStringItem(
-      AdditionalDataFieldID.REFERENCE_LABEL,
-      this.data?.additionalData?.referenceLabel || null,
-    );
-  }
-
-  private genCustomerLabelInfo(): string {
-    return this.genBasicQrStringItem(
-      AdditionalDataFieldID.CUSTOMER_LABEL,
-      this.data?.additionalData?.customerLabel || null,
-    );
-  }
-
-  private genTerminalLabelInfo(): string {
-    return this.genBasicQrStringItem(
-      AdditionalDataFieldID.TERMINAL_LABEL,
-      this.data?.additionalData?.terminalLabel || null,
-    );
-  }
-
-  private genPurposeOfTxnInfo(): string {
-    return this.genBasicQrStringItem(
-      AdditionalDataFieldID.PURPOSE_OF_TRANSACTION,
-      this.data?.additionalData?.purposeOfTxn || null,
-    );
-  }
-
-  private genAdditionalConsumerDataReq(): string {
-    return this.genBasicQrStringItem(
-      AdditionalDataFieldID.ADDITIONAL_CONSUMER_DATA_REQUEST,
-      this.data?.additionalData?.additionalConsumerDataReq || null,
-    );
+    if (!this.data.additionalData) return '';
+    const d = this.data.additionalData;
+    const inner = [
+      this.genBasicQrStringItem(AdditionalDataFieldID.BILL_NUMBER, d.billNumber),
+      this.genBasicQrStringItem(AdditionalDataFieldID.MOBILE_NUMBER, d.mobileNumber),
+      this.genBasicQrStringItem(AdditionalDataFieldID.STORE_LABEL, d.storeLabel),
+      this.genBasicQrStringItem(AdditionalDataFieldID.LOYALTY_NUMBER, d.loyaltyNumber),
+      this.genBasicQrStringItem(AdditionalDataFieldID.REFERENCE_LABEL, d.referenceLabel),
+      this.genBasicQrStringItem(AdditionalDataFieldID.CUSTOMER_LABEL, d.customerLabel),
+      this.genBasicQrStringItem(AdditionalDataFieldID.TERMINAL_LABEL, d.terminalLabel),
+      this.genBasicQrStringItem(AdditionalDataFieldID.PURPOSE_OF_TRANSACTION, d.purposeOfTxn),
+      this.genBasicQrStringItem(
+        AdditionalDataFieldID.ADDITIONAL_CONSUMER_DATA_REQUEST,
+        d.additionalConsumerDataReq,
+      ),
+    ].join('');
+    return this.genBasicQrStringItem(VietQrFieldID.ADDITIONAL_DATA, inner);
   }
 
   private genLanguageTemplateInfo(): string {
-    return this.data.languageTemplate
-      ? this.genBasicQrStringItem(
-          VietQrFieldID.LANGUAGE_TEMPLATE,
-          this.genLanguagePreferenceInfo() +
-            this.genLanguageMerchantNameInfo() +
-            this.genLanguageMerchantCityInfo(),
-        )
-      : '';
-  }
-
-  private genLanguagePreferenceInfo(): string {
-    return this.genBasicQrStringItem(
-      LanguageTemplateFieldID.LANGUAGE_PREFERENCE,
-      this.data?.languageTemplate?.preference || null,
-    );
-  }
-
-  private genLanguageMerchantNameInfo(): string {
-    return this.genBasicQrStringItem(
-      LanguageTemplateFieldID.ALTERNATE_MERCHANT_NAME,
-      this.data?.languageTemplate?.merchantName || null,
-    );
-  }
-
-  private genLanguageMerchantCityInfo(): string {
-    return this.genBasicQrStringItem(
-      LanguageTemplateFieldID.ALTERNATE_MERCHANT_CITY,
-      this.data?.languageTemplate?.merchantCity || null,
-    );
+    if (!this.data.languageTemplate) return '';
+    const inner = [
+      this.genBasicQrStringItem(
+        LanguageTemplateFieldID.LANGUAGE_PREFERENCE,
+        this.data.languageTemplate.preference || null,
+      ),
+      this.genBasicQrStringItem(
+        LanguageTemplateFieldID.ALTERNATE_MERCHANT_NAME,
+        this.data.languageTemplate.merchantName || null,
+      ),
+      this.genBasicQrStringItem(
+        LanguageTemplateFieldID.ALTERNATE_MERCHANT_CITY,
+        this.data.languageTemplate.merchantCity || null,
+      ),
+    ].join('');
+    return this.genBasicQrStringItem(VietQrFieldID.LANGUAGE_TEMPLATE, inner);
   }
 }
