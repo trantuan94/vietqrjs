@@ -1,6 +1,6 @@
 {
   "name": "vietqrjs",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Package support generate or decode VietQR code",
   "main": "dist/index.js",
   "scripts": {
