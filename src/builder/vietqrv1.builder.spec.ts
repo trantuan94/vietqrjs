@@ -127,12 +127,11 @@ describe('VietQRV1Builder', () => {
     });
 
     it('refresh should reset dynamic mode to static', () => {
-      vietqr
-        .quickBuild({
-          acquierId: BankBIN.VIETINBANK,
-          merchantId: '123456789',
-          amount: 100000,
-        });
+      vietqr.quickBuild({
+        acquierId: BankBIN.VIETINBANK,
+        merchantId: '123456789',
+        amount: 100000,
+      });
       expect(vietqr.getQrString()).toContain('010212'); // dynamic after amount
 
       vietqr.refresh();

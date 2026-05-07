@@ -283,13 +283,13 @@ describe('VietQrV1Decryptor', () => {
   describe('decryptMerchantAccInfo', () => {
     it('should return value without optional serviceCode', () => {
       // Raw: guid + beneficiaryOrg only, no serviceCode field
-      expect(
-        decryptor.decryptMerchantAccInfo('0010A000000727012300069704030109123456789'),
-      ).toEqual({
-        guid: 'A000000727',
-        beneficiaryOrg: {acquierId: '970403', merchantId: '123456789'},
-        serviceCode: undefined,
-      });
+      expect(decryptor.decryptMerchantAccInfo('0010A000000727012300069704030109123456789')).toEqual(
+        {
+          guid: 'A000000727',
+          beneficiaryOrg: {acquierId: '970403', merchantId: '123456789'},
+          serviceCode: undefined,
+        },
+      );
     });
 
     it('should return value', () => {
