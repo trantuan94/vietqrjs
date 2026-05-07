@@ -31,11 +31,41 @@ MoMo Wallet transfer QR code:
 </p>
 
 ## Change Logs:
+### <b>v2.0.0</b> — Breaking Changes
+#### Removed deprecated methods from `VietQRV1Builder`
+The following methods were deprecated in v1.1.2 and have been **removed** in v2.0.0:
+
+| Removed | Use instead |
+|---|---|
+| `getQrCodeString()` | `getQrString()` |
+| `setmerchantCategoryCode(mcc)` | `setMerchantCategoryCode(mcc)` |
+
+#### `crcCode` is now optional in `IVietQrDataV1`
+```ts
+// v1.x
+crcCode: string; // ID 63
+
+// v2.0
+crcCode?: string; // ID 63
+```
+Code that accesses `qrData.crcCode` without a null-check may need to be updated.
+
+#### Dependency changes
+- Removed `country-data`: country/currency validation now uses built-in ISO 3166-1 alpha-2 and ISO 4217 numeric sets — **stricter validation** (format-only codes like `"ZZ"` that aren't real country codes are now rejected).
+- Removed `lodash`: replaced with native JS equivalents.
+
+#### Other improvements (non-breaking)
+- Fixed `calcCrcCheckSum` padding bug — CRC values below `0x1000` previously produced 3-char strings instead of 4, causing QR validation failures.
+- Fixed `isValidChecksum` stateful regex bug — repeated calls no longer return incorrect results.
+- Decryptor refactored to config-driven parsing; behavior is identical.
+- ESLint migrated to flat config (`eslint.config.js`).
+
+---
 ### <b>v1.1.3</b>
   - Update donation information :)
 ### <b>v1.1.2</b>
   - Add the 2nd parameter for VietQrV1Decryptor decrypt function to support return lean|full decrypted QR data object
-  - Set the setmerchantCategoryCode and getQrCodeString function in VietQRV1Builder class is deprecated, instead by setMerchantCategoryCode and getQrString function
+  - Deprecated `setmerchantCategoryCode` and `getQrCodeString` in VietQRV1Builder (removed in v2.0.0)
   - Update function generateQR of VietQRV1Builder class
   - Update docs on README
 ### <b>v1.1.1</b>
@@ -69,7 +99,7 @@ interface IVietQrDataV1 {
   postalCode?: StringOrNot; // ID 61
   additionalData?: IAdditionalData | null | undefined; // ID 62
   languageTemplate?: ILanguageTemplate | null | undefined; // ID 64
-  crcCode: string; // ID 63
+  crcCode?: string; // ID 63
 }
 ```
 ### interface IBasicVietQrData
@@ -145,12 +175,11 @@ interface IGenerateQROptions {
 
 ## VietQRV1Builder
 ### Functions:
-- quickBuild(data; IBasicVietQrData): VietQRV1Builder; // quick build QR string from minimum required VietQR data
-- getQrString(): string; // Get the result of quickbuild or build function from builder
-- build(): VietQRV1Builder; // build the QR string after set some VietQR data
-- refresh(): VietQRV1Builder; // Refresh VietQR data of builder to initialization 
-- getQrCodeString(): string; // (deprecated) // Get the result of quickbuild or build function from builder
-- generateQR(options?: IGenerateQROptions): string; // generate base64 QR image
+- quickBuild(data: IBasicVietQrData): VietQRV1Builder; // quick build QR string from minimum required VietQR data
+- getQrString(): string; // Get the result of quickBuild or build
+- build(): VietQRV1Builder; // build the QR string after setting VietQR data
+- refresh(): VietQRV1Builder; // Reset builder state to defaults
+- generateQR(options?: IGenerateQROptions): Promise&lt;string&gt;; // generate base64 QR image
 - setMerchantAccountInfo(data: IMerchantAccountInfo): VietQRV1Builder;
 - setMerchantName(merchantName: string): VietQRV1Builder;
 - setMerchantCity(merchantCity: string): VietQRV1Builder;
