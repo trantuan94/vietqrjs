@@ -1,4 +1,5 @@
 import {BankBIN, MerchantCategoryCode, ServiceCode} from '../constants';
+import {isValidChecksum} from '../utils';
 import {VietQRV1Builder} from './vietqrv1.builder';
 
 describe('VietQRV1Builder', () => {
@@ -67,6 +68,18 @@ describe('VietQRV1Builder', () => {
   });
 
   describe('build', () => {
+    it('render static qr string with minimal input (no amount, no description)', () => {
+      const qrString = vietqr
+        .quickBuild({
+          acquierId: BankBIN.VIETCOMBANK,
+          merchantId: '123456789',
+        })
+        .getQrString();
+      expect(qrString).toContain('010211'); // static mode (no amount)
+      expect(qrString).toContain('QRIBFTTA'); // default service code
+      expect(isValidChecksum(qrString)).toBeTruthy();
+    });
+
     it('render static qr string with service cash withdrawl', () => {
       const qrString = vietqr
         .setMerchantAccountInfo({
@@ -94,6 +107,45 @@ describe('VietQRV1Builder', () => {
         '00020101021138500010A000000727012200069704160108123456780206QRCASH5204601153037045802VN5912NGUYEN VAN A6006HA NOI6237052120190109155714228384707080000111163049CE4',
       );
       expect(qrString).toContain('QRCASH');
+    });
+
+    it('should use custom currency and country code', () => {
+      const qrString = vietqr
+        .setMerchantAccountInfo({
+          beneficiaryOrg: {
+            acquierId: BankBIN.VIETCOMBANK,
+            merchantId: '123456789',
+          },
+        })
+        .setTxnCurrency(458) // MYR
+        .setTxnCountry('MY')
+        .build()
+        .getQrString();
+      expect(qrString).toContain('5303458'); // field 53, len 03, value 458
+      expect(qrString).toContain('5802MY'); // field 58, len 02, value MY
+      expect(isValidChecksum(qrString)).toBeTruthy();
+    });
+
+    it('refresh should reset dynamic mode to static', () => {
+      vietqr
+        .quickBuild({
+          acquierId: BankBIN.VIETINBANK,
+          merchantId: '123456789',
+          amount: 100000,
+        });
+      expect(vietqr.getQrString()).toContain('010212'); // dynamic after amount
+
+      vietqr.refresh();
+      vietqr
+        .setMerchantAccountInfo({
+          beneficiaryOrg: {
+            acquierId: BankBIN.VIETINBANK,
+            merchantId: '123456789',
+          },
+        })
+        .build();
+      expect(vietqr.getQrString()).toContain('010211'); // static after refresh
+      expect(vietqr.getQrString()).toContain('5303704'); // default VND currency
     });
 
     it('render dynamic qr string with service payment product', () => {
@@ -136,6 +188,17 @@ describe('VietQRV1Builder', () => {
   });
 
   describe('generateQR', () => {
+    it('generate base64 png image with default options', async () => {
+      const qrBase64Image = await vietqr
+        .quickBuild({
+          acquierId: BankBIN.VIETINBANK,
+          merchantId: '123456789',
+          serviceCode: ServiceCode.BY_ACCOUNT_NUMBER,
+        })
+        .generateQR(); // no options — exercises all default values
+      expect(qrBase64Image).toMatch(/^data:image\/png;base64,/);
+    });
+
     it('generate base64 png image', async () => {
       const qrBase64Image = await vietqr
         .quickBuild({

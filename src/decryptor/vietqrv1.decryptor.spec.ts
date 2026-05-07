@@ -1,5 +1,5 @@
 import {VietQRFieldName, VietQrFieldID} from '../constants';
-import {isANS, isNumeric} from '../utils';
+import {calcCrcCheckSum, isANS, isNumeric} from '../utils';
 import {VietQrV1Decryptor} from './vietqrv1.decryptor';
 
 describe('VietQrV1Decryptor', () => {
@@ -140,6 +140,19 @@ describe('VietQrV1Decryptor', () => {
       });
     });
 
+    it('decrypt minimal qr string without additionalData or languageTemplate', () => {
+      // QR produced by the builder: VIETINBANK + QRIBFTTA, no amount, no extra fields
+      const qrData = decryptor.decrypt(
+        '00020101021138530010A0000007270123000697041501091234567890208QRIBFTTA53037045802VN63046376',
+      );
+      expect(qrData.version).toEqual('01');
+      expect(qrData.initMethod).toEqual('11');
+      expect(qrData.txnCurrency).toEqual(704);
+      expect(qrData.countryCode).toEqual('VN');
+      expect(qrData.additionalData).toBeUndefined();
+      expect(qrData.languageTemplate).toBeUndefined();
+    });
+
     it('should throw error by invalid checksum', () => {
       try {
         decryptor.decrypt(
@@ -186,6 +199,39 @@ describe('VietQrV1Decryptor', () => {
         expect(err.message).toEqual('Field country code in QR is required.');
       }
     });
+    it('decrypt qrpush with INPUT_TIP (tip indicator 01)', () => {
+      const base =
+        '00020101021238580010A00000072701300006970403011621129950446040250206QRPUSH52045812530370454061800005502015802VN5910PHUONG CAC6005HANOI62110307NPS68696304';
+      const qrString = base + calcCrcCheckSum(base);
+      const qrData = decryptor.decrypt(qrString);
+
+      expect(qrData.tipConvenienceIndicator).toEqual('01');
+      expect(qrData.convenienceFeeFixed).toBeUndefined();
+      expect(qrData.convenienceFeePercentage).toBeUndefined();
+    });
+
+    it('decrypt qrpush with FEE_FIXED (tip indicator 02)', () => {
+      const base =
+        '00020101021238580010A00000072701300006970403011621129950446040250206QRPUSH5204581253037045406180000550202560450005802VN5910PHUONG CAC6005HANOI62110307NPS68696304';
+      const qrString = base + calcCrcCheckSum(base);
+      const qrData = decryptor.decrypt(qrString);
+
+      expect(qrData.tipConvenienceIndicator).toEqual('02');
+      expect(qrData.convenienceFeeFixed).toEqual('5000');
+      expect(qrData.convenienceFeePercentage).toBeUndefined();
+    });
+
+    it('decrypt qrpush with FEE_PERCENTAGE (tip indicator 03)', () => {
+      const base =
+        '00020101021238580010A00000072701300006970403011621129950446040250206QRPUSH520458125303704540618000055020357045.005802VN5910PHUONG CAC6005HANOI62110307NPS68696304';
+      const qrString = base + calcCrcCheckSum(base);
+      const qrData = decryptor.decrypt(qrString);
+
+      expect(qrData.tipConvenienceIndicator).toEqual('03');
+      expect(qrData.convenienceFeePercentage).toEqual('5.00');
+      expect(qrData.convenienceFeeFixed).toBeUndefined();
+    });
+
     it('should throw error by tip or convenience', () => {
       try {
         decryptor.decrypt(
@@ -235,6 +281,17 @@ describe('VietQrV1Decryptor', () => {
     });
   });
   describe('decryptMerchantAccInfo', () => {
+    it('should return value without optional serviceCode', () => {
+      // Raw: guid + beneficiaryOrg only, no serviceCode field
+      expect(
+        decryptor.decryptMerchantAccInfo('0010A000000727012300069704030109123456789'),
+      ).toEqual({
+        guid: 'A000000727',
+        beneficiaryOrg: {acquierId: '970403', merchantId: '123456789'},
+        serviceCode: undefined,
+      });
+    });
+
     it('should return value', () => {
       expect(
         decryptor.decryptMerchantAccInfo(
@@ -268,6 +325,14 @@ describe('VietQrV1Decryptor', () => {
   });
 
   describe('decryptLanguageTemplate', () => {
+    it('should include merchantCity as undefined when lean=false and city absent', () => {
+      expect(decryptor.decryptLanguageTemplate('0002en0107shop vn', {lean: false})).toEqual({
+        preference: 'en',
+        merchantName: 'shop vn',
+        merchantCity: undefined,
+      });
+    });
+
     it('should return language template', () => {
       expect(decryptor.decryptLanguageTemplate('0002en0107shop vn0205Hanoi3')).toEqual({
         preference: 'en',
@@ -296,6 +361,26 @@ describe('VietQrV1Decryptor', () => {
   });
 
   describe('decryptAdditionalData', () => {
+    it('should return only present fields when lean=true (default)', () => {
+      expect(decryptor.decryptAdditionalData('0107B123456')).toEqual({
+        billNumber: 'B123456',
+      });
+    });
+
+    it('should return all fields including undefined when lean=false', () => {
+      expect(decryptor.decryptAdditionalData('0107B123456', {lean: false})).toEqual({
+        billNumber: 'B123456',
+        mobileNumber: undefined,
+        storeLabel: undefined,
+        loyaltyNumber: undefined,
+        referenceLabel: undefined,
+        customerLabel: undefined,
+        terminalLabel: undefined,
+        purposeOfTxn: undefined,
+        additionalConsumerDataReq: undefined,
+      });
+    });
+
     it('should return value', () => {
       expect(
         decryptor.decryptAdditionalData(
@@ -379,6 +464,20 @@ describe('VietQrV1Decryptor', () => {
   });
 
   describe('readQrItem', () => {
+    it('should use default required=false when required is not provided', () => {
+      // Exercises the `required = false` default value branch (line 207)
+      const qrItem = decryptor.readQrItem({
+        fieldId: VietQrFieldID.POSTAL_CODE,
+        fieldName: 'postal code',
+        rawValue: '010501112', // doesn't start with '61'
+        // required not passed — defaults to false → should return without throwing
+      });
+      expect(qrItem).toEqual({
+        fieldId: VietQrFieldID.POSTAL_CODE,
+        nextRawValue: '010501112',
+      });
+    });
+
     it('should throw error by string not start with id', () => {
       try {
         decryptor.readQrItem({
@@ -424,6 +523,16 @@ describe('VietQrV1Decryptor', () => {
         expect(err.message).toEqual('Length of unknown field ID 78 of QR is invalid.');
       }
     });
+
+    it('should include nested field name in error message when context is provided', () => {
+      try {
+        decryptor.ignoreUnknownQrItem('781a00', 'Additional Data');
+      } catch (err) {
+        expect(err.message).toEqual(
+          'Length of unknown field ID 78 in Additional Data field of QR is invalid.',
+        );
+      }
+    });
   });
 
   describe('decryptQrItem', () => {
@@ -445,6 +554,14 @@ describe('VietQrV1Decryptor', () => {
   });
 
   describe('isValidChecksum', () => {
+    it('should return consistent results on repeated calls (regression: stateful regex)', () => {
+      const validQr =
+        '00020101021138570010A00000072701270006970403011200110123456780208QRIBFTTA53037045802VN6304F4E5';
+      expect(decryptor.isValidChecksum(validQr)).toBeTruthy();
+      expect(decryptor.isValidChecksum(validQr)).toBeTruthy();
+      expect(decryptor.isValidChecksum(validQr)).toBeTruthy();
+    });
+
     it('should return true', () => {
       expect(
         decryptor.isValidChecksum(

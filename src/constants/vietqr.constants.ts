@@ -1,5 +1,3 @@
-import {countries, currencies} from 'country-data';
-
 export enum VietQrFieldID {
   VERSION = '00', // Phiên bản dữ liệu của mã QR
   INITIAL_METHOD = '01', // Phương thức khởi tạo
@@ -125,8 +123,8 @@ export enum TipOrConvenienceIndicatorType {
   FEE_PERCENTAGE = '03', // ĐVCNTT thu phí theo tỉ lệ % giao dịch quy định tại ID 57
 }
 
-export const DEFAULT_CURRENCY = currencies.VND.number;
-export const DEFAULT_COUNTRY_CODE = countries.VN.alpha2;
+export const DEFAULT_CURRENCY = 704;
+export const DEFAULT_COUNTRY_CODE = 'VN';
 
 // Define field name for decrypt qr string
 

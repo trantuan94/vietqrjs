@@ -57,7 +57,7 @@ export interface IVietQrDataV1 {
   postalCode?: StringOrNot; // ID 61
   additionalData?: IAdditionalData | null | undefined; // ID 62
   languageTemplate?: ILanguageTemplate | null | undefined; // ID 64
-  crcCode: string; // ID 63
+  crcCode?: string; // ID 63
 }
 
 export interface IBasicVietQrData {

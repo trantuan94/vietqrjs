@@ -9,6 +9,7 @@ import {
   isFloatingPointAmount,
   isNumeric,
   isServiceCode,
+  isTipOrConvenienceIndicator,
   isValidChecksum,
   isValidCountryCode,
   isValidCurrencyCode,
@@ -22,6 +23,12 @@ describe('getEnumKeys', () => {
     };
     const res = getEnumKeys(obj);
     expect(res).toStrictEqual(['a', 'b']);
+  });
+
+  it('should filter out reverse numeric-enum mapping keys', () => {
+    // TypeScript numeric enums produce {A:0, B:1, '0':'A', '1':'B'}
+    const numericEnum = {A: 0, B: 1, C: 2, '0': 'A', '1': 'B', '2': 'C'};
+    expect(getEnumKeys(numericEnum)).toStrictEqual(['A', 'B', 'C']);
   });
 });
 
@@ -42,16 +49,22 @@ describe('isValidCountryCode', () => {
     expect(isValidCountryCode('a')).toBeFalsy();
     expect(isValidCountryCode('vn')).toBeFalsy();
   });
+  it('valid format but not in ISO 3166-1 alpha-2 should return false', () => {
+    expect(isValidCountryCode('AA')).toBeFalsy();
+    expect(isValidCountryCode('ZZ')).toBeFalsy();
+  });
 });
 
 describe('isValidCurrencyCode', () => {
   it('should return true', () => {
-    isValidCurrencyCode('704');
-    isValidCurrencyCode(458);
+    expect(isValidCurrencyCode('704')).toBeTruthy(); // VND
+    expect(isValidCurrencyCode(458)).toBeTruthy(); // MYR
+    expect(isValidCurrencyCode(840)).toBeTruthy(); // USD
   });
   it('should return false', () => {
-    isValidCurrencyCode('74');
-    isValidCurrencyCode(48);
+    expect(isValidCurrencyCode(1)).toBeFalsy(); // below valid ISO 4217 range
+    expect(isValidCurrencyCode(2)).toBeFalsy(); // below valid ISO 4217 range
+    expect(isValidCurrencyCode('abc')).toBeFalsy(); // non-numeric
   });
 });
 
@@ -159,6 +172,33 @@ describe('calcQrItemDataLength', () => {
   it('should return valid length', () => {
     expect(calcQrItemDataLength('abc')).toEqual('03');
     expect(calcQrItemDataLength('123abc')).toEqual('06');
+  });
+  it('should handle number input', () => {
+    expect(calcQrItemDataLength(704)).toEqual('03');
+    expect(calcQrItemDataLength(53)).toEqual('02');
+  });
+});
+
+describe('isTipOrConvenienceIndicator', () => {
+  it('should return true for valid indicators', () => {
+    expect(isTipOrConvenienceIndicator('01')).toBeTruthy(); // INPUT_TIP
+    expect(isTipOrConvenienceIndicator('02')).toBeTruthy(); // FEE_FIXED
+    expect(isTipOrConvenienceIndicator('03')).toBeTruthy(); // FEE_PERCENTAGE
+  });
+  it('should return false for invalid indicators', () => {
+    expect(isTipOrConvenienceIndicator('00')).toBeFalsy();
+    expect(isTipOrConvenienceIndicator('04')).toBeFalsy();
+    expect(isTipOrConvenienceIndicator('')).toBeFalsy();
+  });
+});
+
+describe('isValidChecksum - repeated calls', () => {
+  it('should return consistent results when called multiple times', () => {
+    const validQr =
+      '00020101021138570010A00000072701270006970403011200110123456780208QRIBFTTA53037045802VN6304F4E5';
+    expect(isValidChecksum(validQr)).toBeTruthy();
+    expect(isValidChecksum(validQr)).toBeTruthy();
+    expect(isValidChecksum(validQr)).toBeTruthy();
   });
 });
 

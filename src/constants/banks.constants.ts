@@ -108,10 +108,10 @@ export const Banks = [
     vietqr: SupportLevel.FULL_FEATURES,
   },
   {
-    name: 'Ngân hàng TMCP Bưu Điện Liên Việt',
+    name: 'Ngân hàng TMCP Lộc Phát Việt Nam',
     code: 'LPB',
     bin: '970449',
-    shortName: 'LienVietPostBank',
+    shortName: 'LPBank',
     logo: 'https://vietqr.net/img/LPB.07a7c83b.png',
     vietqr: SupportLevel.FULL_FEATURES,
   },
